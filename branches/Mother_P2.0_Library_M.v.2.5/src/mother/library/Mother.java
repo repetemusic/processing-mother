@@ -188,6 +188,8 @@ public class Mother
 
 		synchronized (m_SynthContainer)
 		{
+			PGraphics previous = null;
+			
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++)
 			{
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
@@ -213,9 +215,19 @@ public class Mother
 				r_Parent.pushStyle();
 					
 				gl2.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
-					
+
+				current.foetusField.incoming = previous;
+				
+				previous = current.foetusField.outgoing;
+								
 				current.draw(m_Stereo);
 
+				r_Parent.image(current.foetusField.outgoing, 
+						0, 
+						0, 
+						r_Parent.width, 
+						r_Parent.height);
+				
 				callRegisteredMethod(current, "draw");
 
 				gl2.glPopAttrib();

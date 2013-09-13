@@ -30,6 +30,9 @@ import java.util.*;
 import megamu.shapetween.Tween;
 
 public class Foetus {
+	public PGraphics incoming;
+	public PGraphics outgoing;
+	
 	PApplet parent;
 	
 	int[] m_BGColor;

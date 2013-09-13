@@ -24,13 +24,13 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 //import processing.core.PApplet.RegisteredMethods;
 
 import foetus.*;
 
-public class SynthContainer
-{
+public class SynthContainer {
 	ArrayList<URL> m_Visual_Synth_urls;
 
 	URL[] m_Library_file_URLS;
@@ -39,8 +39,7 @@ public class SynthContainer
 
 	ArrayList<ChildWrapper> m_VisualSynths;
 
-	ArrayList<ChildWrapper> Synths()
-	{
+	ArrayList<ChildWrapper> Synths() {
 		return m_VisualSynths;
 	}
 
@@ -48,23 +47,19 @@ public class SynthContainer
 
 	String m_Synth_Folder;
 
-	URL[] get_Library_File_URLS()
-	{
+	URL[] get_Library_File_URLS() {
 		return m_Library_file_URLS;
 	}
 
-	Hashtable<String, String> get_Synth_Names()
-	{
+	Hashtable<String, String> get_Synth_Names() {
 		return m_Visual_Synth_Names;
 	}
 
-	public SynthContainer(String folder)
-	{
-		m_VisualSynths = new ArrayList<ChildWrapper>();
-		m_Visual_Synth_Names = new Hashtable<String, String>();
-		m_Visual_Synth_Keys = new Hashtable<String, String>();
-
-		m_Synth_Folder = folder;
+	public SynthContainer(String folder) {
+		m_VisualSynths 			= new ArrayList<ChildWrapper>();
+		m_Visual_Synth_Names 	= new Hashtable<String, String>();
+		m_Visual_Synth_Keys 	= new Hashtable<String, String>();
+		m_Synth_Folder 			= folder;
 
 		PopulateSynthURLS();
 		PopulateLibraryURLS();
@@ -73,48 +68,39 @@ public class SynthContainer
 	/*
 	 * Scans folder containing synths and stores URL for each
 	 */
-	private void PopulateSynthURLS()
-	{
-		String[] fileName;
-		File oooClassPath = new File(m_Synth_Folder);
-		File[] files = oooClassPath.listFiles();
-		m_Visual_Synth_urls = new ArrayList<URL>();
+	private void PopulateSynthURLS() {
+		String[] 	fileName;
+		File 		oooClassPath 	= new File(m_Synth_Folder);
+		File[] 		files 			= oooClassPath.listFiles();
+		m_Visual_Synth_urls 		= new ArrayList<URL>();
 
-		if (files != null)
-		{
-			for (int i = 0; i < files.length; i++)
-			{
-				try
-				{
+		if (files != null) {
+			for (int i = 0; i < files.length; i++) {
+				try	{
 					fileName = files[i].getName().split("\\.");
 
-					if ((fileName.length > 1) && (fileName[fileName.length - 1].compareTo("jar") == 0))
-					{
+					if ((fileName.length > 1) && 
+							(fileName[fileName.length - 1].compareTo("jar") == 0)) {
 						m_Visual_Synth_urls.add(files[i].toURI().toURL());
-						System.out.println("Found Synth: " + fileName[0]);
-
 						m_Visual_Synth_Names.put(fileName[0], fileName[0]);
+						System.out.println("Found Synth: " + fileName[0]);
 					}
 				}
-				catch (MalformedURLException ex)
-				{
+				catch (MalformedURLException ex) {
 					System.out.println("MalformedURLException: " + ex.getMessage());
 				}
-				catch (Exception e)
-				{
+				catch (Exception e) {
 					System.out.println(e.getMessage());
 					e.printStackTrace();
 				}
 			}
 		}
-		else
-		{
+		else {
 			System.out.println("Synth folder not found, or empty!");
 		}
 	}
 
-	private void PopulateLibraryURLS()
-	{
+	private void PopulateLibraryURLS() {
 		String[] fileName;
 		File oooClassPath;
 
@@ -128,48 +114,39 @@ public class SynthContainer
 		ArrayList<URL> temp_Library_file_URLS = new ArrayList<URL>();
 
 		// Check if Libraries folder exists. If not, create empty list.
-		if (files != null)
-		{
-			try
-			{
-				for (int i = 0; i < files.length; i++)
-				{
+		if (files != null) {
+			try	{
+				for (int i = 0; i < files.length; i++)	{
 					fileName = files[i].getName().split("\\.");
 
-					if ((fileName.length > 1) && (fileName[fileName.length - 1].compareTo("jar") == 0))
-					{
+					if(	(fileName.length > 1) && 
+						(fileName[fileName.length - 1].compareTo("jar") == 0) ) {
 						temp_Library_file_URLS.add(files[i].toURI().toURL());
 						System.out.println("Found library: " + fileName[0]);
 					}
 				}
 			}
-			catch (MalformedURLException ex)
-			{
+			catch (MalformedURLException ex) {
 				System.out.println("MalformedURLException: " + ex.getMessage());
 			}
-			catch (Exception e)
-			{
+			catch (Exception e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
 
 			m_Library_file_URLS = new URL[temp_Library_file_URLS.size()];
 
-			for (int i = 0; i < temp_Library_file_URLS.size(); i++)
-			{
+			for (int i = 0; i < temp_Library_file_URLS.size(); i++)	{
 				m_Library_file_URLS[i] = temp_Library_file_URLS.get(i);
 			}
 		}
-		else
-		{
+		else {
 			m_Library_file_URLS = new URL[0];
 		}
 	}
 
-	public boolean contains(String key)
-	{
-		if (!m_Visual_Synth_Keys.containsKey(key))
-		{
+	public boolean contains(String key) {
+		if (!m_Visual_Synth_Keys.containsKey(key)) {
 			return false;
 		}
 		else
@@ -183,8 +160,7 @@ public class SynthContainer
 	 * @return
 	 */
 	
-	private PApplet LoadSketch(String classPath, String className, URL[] libraryURLS)
-    {   
+	private PApplet LoadSketch(String classPath, String className, URL[] libraryURLS) {   
 		File dir1 = new File (".");
 	    
 		if(libraryURLS==null) {
@@ -207,10 +183,8 @@ public class SynthContainer
 
         URL[] toUse = new URL[1 + libraryURLS.length];
         
-        try
-        { 
-	        for(int i = 0; i<libraryURLS.length; i++ )
-	        {
+        try { 
+	        for(int i = 0; i<libraryURLS.length; i++ ) {
 	      		toUse[i] = libraryURLS[i];
 	        }
 	            
@@ -224,8 +198,7 @@ public class SynthContainer
         	
             return toReturn;
         } 
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
         	System.out.println("Loading child failed, probably jar file could not be found! " + 
         			ex.getMessage());
         }
@@ -236,12 +209,10 @@ public class SynthContainer
 	/*
 	 * Create a new synth layer
 	 */
-	public ChildWrapper Add(String key, String sketchName, Mother mother)
-	{
+	public ChildWrapper Add(String key, String sketchName, Mother mother) {
 		ChildWrapper new_Wrapper = null;
 		
-		if(!m_Visual_Synth_Keys.containsKey(key))
-		{		
+		if(!m_Visual_Synth_Keys.containsKey(key)) {		
 			PApplet child = null;
 						
 			child = LoadSketch(m_Synth_Folder, sketchName, m_Library_file_URLS);
@@ -262,16 +233,12 @@ public class SynthContainer
 		return new_Wrapper;
 	}
 
-	public ChildWrapper GetChildWrapper(String key)
-	{
+	public ChildWrapper GetChildWrapper(String key)	{
 		ChildWrapper toReturn = null;
 
-		if (m_Visual_Synth_Keys.containsKey(key))
-		{
-			for (int i = 0; i < m_VisualSynths.size(); i++)
-			{
-				if (((ChildWrapper) m_VisualSynths.get(i)).GetName().compareTo(key) == 0)
-				{
+		if (m_Visual_Synth_Keys.containsKey(key)) {
+			for (int i = 0; i < m_VisualSynths.size(); i++)	{
+				if (((ChildWrapper) m_VisualSynths.get(i)).GetName().compareTo(key) == 0) {
 					return (ChildWrapper) m_VisualSynths.get(i);
 				}
 			}
@@ -280,16 +247,12 @@ public class SynthContainer
 		return toReturn;
 	}
 
-	public ChildWrapper Remove(String key)
-	{
+	public ChildWrapper Remove(String key) {
 		ChildWrapper toReturn = null;
 
-		if (m_Visual_Synth_Keys.containsKey(key))
-		{
-			for (int i = 0; i < m_VisualSynths.size(); i++)
-			{
-				if (((ChildWrapper) m_VisualSynths.get(i)).GetName().compareTo(key) == 0)
-				{
+		if (m_Visual_Synth_Keys.containsKey(key)) {
+			for (int i = 0; i < m_VisualSynths.size(); i++)	{
+				if (((ChildWrapper) m_VisualSynths.get(i)).GetName().compareTo(key) == 0) {
 					toReturn = ((ChildWrapper) m_VisualSynths.get(i));
 
 					((ChildWrapper) m_VisualSynths.get(i)).Child().stop();
@@ -303,31 +266,26 @@ public class SynthContainer
 
 			return toReturn;
 		}
-		else
-		{
+		else {
 			return toReturn;
 		}
 	}
 
-	public boolean reset()
-	{
+	public boolean reset() {
 		m_Visual_Synth_Keys.clear();
 		m_VisualSynths.clear();
 
 		return true;
 	}
 
-	public boolean Move(String key, int newLocation)
-	{
-		if (m_Visual_Synth_Keys.containsKey(key))
-		{
-			for (int i = 0; i < m_VisualSynths.size(); i++)
-			{
+	public boolean Move(String key, int newLocation) {
+		if (m_Visual_Synth_Keys.containsKey(key)) {
+			for (int i = 0; i < m_VisualSynths.size(); i++)	{
 				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
 
-				if ((element.GetName().compareTo(key) == 0) && (m_VisualSynths.size() > newLocation)
-						&& (newLocation >= 0))
-				{
+				if ((element.GetName().compareTo(key) == 0) &&
+						(m_VisualSynths.size() > newLocation)
+						&& (newLocation >= 0)) {
 					m_VisualSynths.remove(i);
 
 					m_VisualSynths.add(newLocation, element);
@@ -337,22 +295,17 @@ public class SynthContainer
 
 			return true;
 		}
-		else
-		{
+		else {
 			return false;
 		}
 	}
 
-	public boolean Set_Synth_Blending(String key, int source, int dest)
-	{
-		if (m_Visual_Synth_Keys.containsKey(key))
-		{
-			for (int i = 0; i < m_VisualSynths.size(); i++)
-			{
+	public boolean Set_Synth_Blending(String key, int source, int dest)	{
+		if (m_Visual_Synth_Keys.containsKey(key)) {
+			for (int i = 0; i < m_VisualSynths.size(); i++)	{
 				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
 
-				if (element.GetName().compareTo(key) == 0)
-				{
+				if (element.GetName().compareTo(key) == 0)	{
 					/*
 					 * GL_ZERO 0 GL_ONE 1 GL_SRC_COLOR 768 GL_ONE_MINUS_SRC_COLOR 769 GL_DST_COLOR 774
 					 * GL_ONE_MINUS_DST_COLOR 775 GL_SRC_ALPHA 770 GL_ONE_MINUS_SRC_ALPHA 771 GL_DST_ALPHA 772
@@ -369,16 +322,13 @@ public class SynthContainer
 
 			return true;
 		}
-		else
-		{
+		else {
 			return false;
 		}
 	}
 
-	public void Initialize(Mother mother)
-	{
-		for (int i = 0; i < m_VisualSynths.size(); i++)
-		{
+	public void Initialize(Mother mother) {
+		for (int i = 0; i < m_VisualSynths.size(); i++) {
 			InitChild(((ChildWrapper) m_VisualSynths.get(i)), mother);
 		}
 	}
@@ -406,20 +356,20 @@ public class SynthContainer
 	/*
 	 * 
 	 */
-	private void InitChild(ChildWrapper cw, Mother parent)
-	{
+	private void InitChild(ChildWrapper cw, Mother parent)	{
 		PApplet child = cw.Child();
 
-		Method[] methods = child.getClass().getMethods();
-		Method[] declaredMethods = child.getClass().getDeclaredMethods();
-
+		Method[] methods 			= child.getClass().getMethods();
+		Method[] declaredMethods 	= child.getClass().getDeclaredMethods();
+		
 		child.g = parent.GetParent().g;
-
+				
 		child.setSize(parent.getChildWidth(), parent.getChildHeight());
 
 		/*
-		 * With this, I'm hoping the child will run in a separate thread, but its timer will not call the draw method.
-		 * Instead, ony one timer is running, the one in Mother.
+		 * With this, I'm hoping the child will run in a separate thread, 
+		 * but its timer will not call the draw method.
+		 * Instead, only one timer is running, the one in Mother.
 		 */
 		child.noLoop();
 
@@ -431,29 +381,23 @@ public class SynthContainer
 
 		// initializeRegisteredMapField(cw);
 
-		child.frameCount = parent.GetParent().frameCount;
-		child.frameRate = parent.GetParent().frameRate;
-		child.frame = parent.GetParent().frame;
-		// child.screen = parent.GetParent().screen;
-		child.recorder = parent.GetParent().recorder;
-
-		child.sketchPath = m_Synth_Folder;
-
-		child.pixels = parent.GetParent().pixels;
-
-		child.width = parent.getChildWidth();
-		child.height = parent.getChildHeight();
+		child.frameCount 	= parent.GetParent().frameCount;
+		child.frameRate 	= parent.GetParent().frameRate;
+		child.frame 		= parent.GetParent().frame;
+// 		child.screen 		= parent.GetParent().screen;
+		child.recorder 		= parent.GetParent().recorder;
+		child.sketchPath 	= m_Synth_Folder;
+		child.pixels 		= parent.GetParent().pixels;
+		child.width 		= parent.getChildWidth();
+		child.height 		= parent.getChildHeight();
 
 		child.noLoop();
 
 		Foetus foetusField;
 
-		try
-		{
-			for (int i = 0; i < declaredMethods.length; i++)
-			{
-				if (declaredMethods[i].getName().equals("initializeFoetus"))
-				{
+		try	{
+			for (int i = 0; i < declaredMethods.length; i++) {
+				if (declaredMethods[i].getName().equals("initializeFoetus")) {
 					declaredMethods[i].invoke(child, new Object[] {});
 
 					break;
@@ -468,10 +412,14 @@ public class SynthContainer
 
 			foetusField.setSpeedFraction(parent.getSpeedFraction());
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			System.out.println("CRASH while initializing synth. Message: " + e.getMessage());
 		}
-	}
+		
+		PGraphics kidPG = parent.GetParent().createGraphics(	parent.GetParent().width, 
+				parent.GetParent().height, 
+				parent.GetParent().OPENGL);
 
+		cw.getFoetusField().outgoing = kidPG;
+	}
 }
