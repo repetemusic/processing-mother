@@ -61,7 +61,7 @@ public class Mother {
 	private int 			m_osc_receive_port;
 	private String 			m_IP;
 	private SynthLoader 	m_SynthLoader;
-	private SynthContainerBase 	m_SynthContainer;
+	private SynthContainer 	m_SynthContainer;
 	private String 			m_Synth_Folder;
 	private int 			m_Width;
 	private int 			m_Height;
@@ -122,7 +122,7 @@ public class Mother {
 		r_Parent.frameRate(m_FrameRate / m_SpeedFraction);
 
 		m_SynthLoader 		= new SynthLoader(m_Synth_Folder);
-		m_SynthContainer	= new SynthContainerBase();
+		m_SynthContainer	= new SynthContainer();
 		m_MessageStack 		= new ArrayList<Message>();
 
 		listenToOSC();

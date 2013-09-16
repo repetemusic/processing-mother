@@ -10,7 +10,7 @@ import java.util.Hashtable;
 /**
  *
  */
-public class ChildWrapper extends SynthContainerBase {
+public class ChildWrapper extends SynthContainer {
 //	private Logger logger = null;
 //	RenderSketchToTexture m_RenderToTexture;
 	

@@ -5,7 +5,7 @@ import java.util.Hashtable;
 
 import processing.core.PApplet;
 
-public class SynthContainerBase
+public class SynthContainer
 {
 	private ArrayList<ChildWrapper> 	m_VisualSynths;
 	private Hashtable<String, String> 	m_Visual_Synth_Keys;
@@ -14,7 +14,7 @@ public class SynthContainerBase
 		return m_VisualSynths;
 	}
 	
-	public SynthContainerBase() {
+	public SynthContainer() {
 		m_VisualSynths 			= new ArrayList<ChildWrapper>();
 		m_Visual_Synth_Keys 	= new Hashtable<String, String>();
 	}
