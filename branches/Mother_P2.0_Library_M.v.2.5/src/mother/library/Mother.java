@@ -222,11 +222,11 @@ public class Mother
 								
 				current.draw(m_Stereo);
 
-				r_Parent.image(current.foetusField.outgoing, 
-						0, 
-						0, 
-						r_Parent.width, 
-						r_Parent.height);
+//				r_Parent.image(current.foetusField.outgoing, 
+//						0, 
+//						0, 
+//						r_Parent.width, 
+//						r_Parent.height);
 				
 				callRegisteredMethod(current, "draw");
 
@@ -239,6 +239,16 @@ public class Mother
 				gl2.glDisable(GL.GL_BLEND);
 
 				callRegisteredMethod(current, "post");
+			}
+
+			if(m_SynthContainer.Synths().size()>0) {
+			current = (ChildWrapper) m_SynthContainer.Synths().get(m_SynthContainer.Synths().size()-1);
+
+			r_Parent.image(current.foetusField.outgoing, 
+					0, 
+					0, 
+					r_Parent.width, 
+					r_Parent.height);
 			}
 		}
 
