@@ -54,8 +54,7 @@ import java.net.UnknownHostException;
 
 import foetus.*;
 
-public class Mother
-{
+public class Mother {
 	public final static String VERSION = "##library.prettyVersion##";
 	
 	private int 			m_osc_send_port;
@@ -89,21 +88,18 @@ public class Mother
 	
 	PApplet GetParent() { return r_Parent; }
 	
-	public Mother(PApplet parent)
-	{
+	public Mother(PApplet parent) {
 		r_Parent = parent;
 	}
 	
-	public int getChildWidth()
-	{
+	public int getChildWidth() {
 		if(m_Stereo)
 			return m_Width/2;
 		else
 			return m_Width;
 	}
 	
-	public int getChildHeight()
-	{
+	public int getChildHeight()	{
 		return m_Height;
 	}
 	
@@ -112,10 +108,8 @@ public class Mother
 	 * 
 	 * @see processing.core.PApplet#setup()
 	 */
-	public void setup()
-	{
-		if(first_run)
-		{
+	public void setup()	{
+		if(first_run) {
 			r_Parent.registerMethod("dispose", this);
 			r_Parent.registerMethod("pre", this);
 			r_Parent.registerMethod("post", this);
@@ -126,41 +120,35 @@ public class Mother
 		
 		r_Parent.frameRate(m_FrameRate / m_SpeedFraction);
 
-		m_SynthContainer = new SynthContainer(m_Synth_Folder);
-
-		m_MessageStack = new ArrayList<Message>();
+		m_SynthContainer 	= new SynthContainer(m_Synth_Folder);
+		m_MessageStack 		= new ArrayList<Message>();
 
 		listenToOSC();
 
+		// Is sthis still necessary in Processing 2.0?
 		PGraphicsOpenGL pgl = (PGraphicsOpenGL) r_Parent.g;
 		PGL 			gl 	= pgl.beginPGL();
 		GL2 			gl2	= gl.gl.getGL2();
-				
 		gl2.setSwapInterval(1); // set vertical sync on
-		
 		pgl.endPGL();
 	}
 
-	public void pre() 	
-	{
+	public void pre() {
 		
 	}
 
-	public void post()	
-	{
+	public void post() {
 		
 	}
 
-	public void dispose()	
-	{
+	public void dispose() {
 		System.out.println("Disposed of."); 
 	}
 
 	/*
 	 * 
 	 */
-	private void PreDrawChildUpdate(PApplet child)
-	{
+	private void PreDrawChildUpdate(PApplet child) {
 		child.mouseX 		= r_Parent.mouseX;
 		child.mouseY 		= r_Parent.mouseY;
 		child.mousePressed 	= r_Parent.mousePressed;
@@ -173,8 +161,7 @@ public class Mother
 	 * 
 	 * @see processing.core.PApplet#draw()
 	 */
-	public void draw()
-	{		
+	public void draw() {		
 		ChildWrapper current;
 	
 		dealWithMessageStack(); // Dealing with message stack
@@ -183,15 +170,14 @@ public class Mother
 		PGL 			gl 	= pgl.beginPGL();
 		GL2 			gl2 = gl.gl.getGL2();
 		
-		gl2.glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Set The Clear Color To Black
+		// Set The Clear Color To Black
+		gl2.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		synchronized (m_SynthContainer)
-		{
+		synchronized (m_SynthContainer)	{
 			PGraphics previous = null;
 			
-			for (int i = 0; i < m_SynthContainer.Synths().size(); i++)
-			{
+			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
 
 				PreDrawChildUpdate(current.Child());
@@ -199,6 +185,7 @@ public class Mother
 				callRegisteredMethod(current, "pre");
 
 				gl2.glEnable(GL.GL_BLEND);
+
 				// opengl.glDisable(GL.GL_DEPTH_TEST); // Disables Depth Testing
 
 				// //For testing (getting opengl state)
@@ -242,13 +229,13 @@ public class Mother
 			}
 
 			if(m_SynthContainer.Synths().size()>0) {
-			current = (ChildWrapper) m_SynthContainer.Synths().get(m_SynthContainer.Synths().size()-1);
-
-			r_Parent.image(current.foetusField.outgoing, 
-					0, 
-					0, 
-					r_Parent.width, 
-					r_Parent.height);
+				current = (ChildWrapper) m_SynthContainer.Synths().get(m_SynthContainer.Synths().size()-1);
+	
+				r_Parent.image(current.foetusField.outgoing, 
+						0, 
+						0, 
+						r_Parent.width, 
+						r_Parent.height);
 			}
 		}
 
@@ -261,20 +248,17 @@ public class Mother
 		printFrameRate();
 	}
 
-	protected void finalize()
-	{
+	protected void finalize() {
 		System.out.println("FINALIZING");
 		output.flush(); // Write the remaining data
 		output.close(); // Finish the file
 	}
 
-	public void keyPressed()
-	{
+	public void keyPressed() {
 		PApplet child;
 		Method keyMethod;
 
-		switch (r_Parent.key)
-		{
+		switch (r_Parent.key) {
 		case 'r':
 			m_WriteImage = !m_WriteImage;
 			break;
@@ -283,13 +267,11 @@ public class Mother
 		// For forwarding keyPressed messages to synths. Not really necessary though as all
 		// communication is supposed to be over OSC.
 
-		for (int i = 0; i < m_SynthContainer.Synths().size(); i++)
-		{
+		for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 			child = ((ChildWrapper) m_SynthContainer.Synths().get(i)).Child();
 
 			// Handling messages to synths
-			try
-			{
+			try {
 				child.keyEvent 	= r_Parent.keyEvent;
 				child.key 		= r_Parent.key;
 				child.keyCode 	= r_Parent.keyCode;
@@ -297,27 +279,23 @@ public class Mother
 				keyMethod = child.getClass().getMethod("keyPressed", new Class[] {});
 				keyMethod.invoke(child, new Object[] {});
 			}
-			catch (Exception e)
-			{
+			catch (Exception e)	{
 				r_Parent.println("CRASH keyPressed" + e.getMessage());
 			}
 		}
 	}
 
-	public void motherAcceptMessage(Date time, OSCMessage message)
-	{
+	public void motherAcceptMessage(Date time, OSCMessage message) {
 		Message m;
 
-		synchronized (m_MessageStack)
-		{
+		synchronized (m_MessageStack) {
 			m 			= new Message();
 			m.time 		= time;
 			m.message 	= message;
 
 			m_MessageStack.add(m);
 
-			if (m_MessageStack.size() > 5000)
-			{
+			if (m_MessageStack.size() > 5000) {
 				System.out.println("Clearing message stack");
 				m_MessageStack.clear();
 			}
@@ -327,8 +305,7 @@ public class Mother
 	/*
 	 * incoming osc message are forwarded to the oscEvent method.
 	 */
-	public void oscEvent(OscMessage theOscMessage)
-	{
+	public void oscEvent(OscMessage theOscMessage) {
 		PApplet child;
 		Method oscEventMethod;
 
@@ -337,60 +314,46 @@ public class Mother
 		String[] splits 	= addrPattern.split("/");
 
 		/* check if theOscMessage has the address pattern we are looking for. */
-		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))
-		{
-			synchronized (m_SynthContainer)
-			{
-				if (splits[2].compareTo("Get_synth_names") == 0)
-				{
+		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))	{
+			synchronized (m_SynthContainer)	{
+				if (splits[2].compareTo("Get_synth_names") == 0) {
 					OSCPortOut sender;
-					try
-					{
+					
+					try	{
 						InetAddress ip = InetAddress.getByName(m_IP);
-						sender = new OSCPortOut(ip, m_osc_send_port);
-
 						ArrayList<String> list = new ArrayList<String>();
-						for (Enumeration<String> e = m_SynthContainer.get_Synth_Names().keys(); e.hasMoreElements();)
-						{
+						sender = new OSCPortOut(ip, m_osc_send_port);
+						
+						for (Enumeration<String> e = m_SynthContainer.get_Synth_Names().keys(); e.hasMoreElements();) {
 							list.add(e.nextElement());
 						}
 
 						Object args[] = new Object[list.size()];
 
-						for (int i = 0; i < list.size(); i++)
-						{
+						for (int i = 0; i < list.size(); i++) {
 							args[i] = list.get(i);
 						}
 
-						OSCMessage msg = new OSCMessage("/Synth_names", args);
-
-						sender.send(msg);
+						sender.send(new OSCMessage("/Synth_names", args));
 					}
-					catch (UnknownHostException e1)
-					{
+					catch (UnknownHostException e1) {
 						e1.printStackTrace();
 					}
-					catch (SocketException e1)
-					{
+					catch (SocketException e1) {
 						e1.printStackTrace();
 					}
-					catch (IOException e)
-					{
+					catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
-				else if (splits[2].compareTo("Add_synth") == 0)
-				{
-					if (theOscMessage.checkTypetag("ss"))
-					{
-						if (!m_SynthContainer.contains(theOscMessage.get(1).stringValue()))
-						{
-							r_Parent.println("redraw no longer set to false!");
-//							r_Parent.redraw = false;
+				else if (splits[2].compareTo("Add_synth") == 0)	{
+					if (theOscMessage.checkTypetag("ss")) {
+						if (!m_SynthContainer.contains(theOscMessage.get(1).stringValue()))	{
 							r_Parent.noLoop();
 
 							ChildWrapper wrapper = m_SynthContainer.Add(	theOscMessage.get(1).stringValue(), 
-																			theOscMessage.get(0).stringValue(), 
+																			theOscMessage.get(0).stringValue(),
+																			m_SynthContainer,
 																			this);
 
 							if(wrapper!=null) {
@@ -398,65 +361,69 @@ public class Mother
 							}
 
 							r_Parent.loop();
-//							this.redraw = true;
-							r_Parent.println("redraw no longer set to true!");							
 						}
 					}
 				}
-				else if (splits[2].compareTo("Reset") == 0)
-				{
+				else if (splits[2].compareTo("Add_ChildSynth") == 0)	{
+					if (theOscMessage.checkTypetag("sss")) {
+						if (!m_SynthContainer.contains(theOscMessage.get(1).stringValue()))	{
+							String parentSynthID = theOscMessage.get(1).stringValue();
+							
+							r_Parent.noLoop();
+
+							ChildWrapper wrapper = m_SynthContainer.Add(	theOscMessage.get(2).stringValue(), 
+																			theOscMessage.get(1).stringValue(),
+																			m_SynthContainer,
+																			this);
+
+							if(wrapper!=null) {
+								sendSupportedMessages(wrapper);
+							}
+
+							r_Parent.loop();
+						}
+					}
+				}
+				else if (splits[2].compareTo("Reset") == 0)	{
 					m_SynthContainer.reset();
 				}
-				else if (splits[2].compareTo("Remove_synth") == 0)
-				{
-					if (theOscMessage.checkTypetag("s"))
-					{
+				else if (splits[2].compareTo("Remove_synth") == 0)	{
+					if (theOscMessage.checkTypetag("s")) {
 						ChildWrapper w = m_SynthContainer.Remove(theOscMessage.get(0).stringValue());
 
 						callRegisteredMethod(w, "dispose");
 					}
 				}
-				else if (splits[2].compareTo("Move_synth") == 0)
-				{
-					if (theOscMessage.checkTypetag("si"))
-					{
+				else if (splits[2].compareTo("Move_synth") == 0) {
+					if (theOscMessage.checkTypetag("si")) {
 						m_SynthContainer.Move(theOscMessage.get(0).stringValue(), theOscMessage.get(1).intValue());
 					}
 				}
-				else if (splits[2].compareTo("Set_synth_blending") == 0)
-				{
-					if (theOscMessage.checkTypetag("sii"))
-					{
+				else if (splits[2].compareTo("Set_synth_blending") == 0) {
+					if (theOscMessage.checkTypetag("sii")) {
 						m_SynthContainer.Set_Synth_Blending(theOscMessage.get(0).stringValue(), theOscMessage.get(1)
 								.intValue(), theOscMessage.get(2).intValue());
 					}
 				}
-				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4)
-				{
+				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4) {
 					StringBuffer newAddrPattern = new StringBuffer();
 					String childName;
 
-					for (int pos = 4; pos < splits.length; pos++)
-					{
+					for (int pos = 4; pos < splits.length; pos++) {
 						newAddrPattern.append("/" + splits[pos]);
 					}
 
-					for (int i = 0; i < m_SynthContainer.Synths().size(); i++)
-					{
+					for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 						child = ((ChildWrapper) m_SynthContainer.Synths().get(i)).Child();
 						childName = ((ChildWrapper) m_SynthContainer.Synths().get(i)).GetName();
 
-						if (childName.compareTo(splits[3]) == 0)
-						{
-							if (splits[4].compareTo("Get_Supported_Messages") == 0)
-							{
+						if (childName.compareTo(splits[3]) == 0) {
+							if (splits[4].compareTo("Get_Supported_Messages") == 0)	{
 								sendSupportedMessages((ChildWrapper) m_SynthContainer.Synths().get(i));
 							}
-							else
+							else {
 							// Handling messages to synths
-							{
-								try
-								{
+								try	{
 									// removing "/Mother/Child/Synth_Name" from address pattern
 									theOscMessage.setAddrPattern(newAddrPattern.toString());
 
@@ -465,8 +432,7 @@ public class Mother
 
 									oscEventMethod.invoke(child, new Object[] { theOscMessage });
 								}
-								catch (Exception e)
-								{
+								catch (Exception e)	{
 									r_Parent.println("CRASH Child oscEvent" + childName + e.getStackTrace());
 									r_Parent.println(e.getStackTrace());
 								}
@@ -476,40 +442,32 @@ public class Mother
 						}
 					}
 				}
-				else if (splits[2].compareTo("Record") == 0)
-				{
-					if (theOscMessage.checkTypetag("i"))
-					{
+				else if (splits[2].compareTo("Record") == 0) {
+					if (theOscMessage.checkTypetag("i")) {
 						int in = theOscMessage.get(0).intValue();
 
-						if (in == 1)
-						{
+						if (in == 1) {
 							m_WriteImage = true;
 							System.out.println("Recording!");
 						}
-						else if (in == 0)
-						{
+						else if (in == 0) {
 							m_WriteImage = false;
 							System.out.println("Stopped Recording!");
-							// loop();
 						}
 					}
 				}
 
 			}
 		}
-		else
+		else {
 		// Message not for mother
-		{
 			// println("Unhandled OSC message: " + theOscMessage.addrPattern());
 		}
 	}
 
-	protected void sendPicWritingStartedMessage()
-	{
+	protected void sendPicWritingStartedMessage() {
 		OSCPortOut sender;
-		try
-		{
+		try	{
 			// (m_IP, m_osc_send_port)
 			InetAddress ip = InetAddress.getByName(m_IP);
 			sender = new OSCPortOut(ip, m_osc_send_port);
@@ -520,8 +478,7 @@ public class Mother
 
 			Object args[] = new Object[list.size()];
 
-			for (int i = 0; i < list.size(); i++)
-			{
+			for (int i = 0; i < list.size(); i++) {
 				args[i] = list.get(i);
 			}
 
@@ -529,27 +486,22 @@ public class Mother
 
 			sender.send(msg);
 		}
-		catch (UnknownHostException e1)
-		{
+		catch (UnknownHostException e1)	{
 			e1.printStackTrace();
 		}
-		catch (SocketException e1)
-		{
+		catch (SocketException e1) {
 			e1.printStackTrace();
 		}
-		catch (IOException ex)
-		{
+		catch (IOException ex) {
 			ex.printStackTrace();
 		}
 
 		r_Parent.redraw();
 	}
 
-	protected void sendNextFrameMessage()
-	{
+	protected void sendNextFrameMessage() {
 		OSCPortOut sender;
-		try
-		{
+		try	{
 			// (m_IP, m_osc_send_port)
 			InetAddress ip = InetAddress.getByName(m_IP);
 			sender = new OSCPortOut(ip, m_osc_send_port);
@@ -560,8 +512,7 @@ public class Mother
 
 			Object args[] = new Object[list.size()];
 
-			for (int i = 0; i < list.size(); i++)
-			{
+			for (int i = 0; i < list.size(); i++) {
 				args[i] = list.get(i);
 			}
 
@@ -569,35 +520,29 @@ public class Mother
 
 			sender.send(msg);
 		}
-		catch (UnknownHostException e1)
-		{
+		catch (UnknownHostException e1)	{
 			e1.printStackTrace();
 		}
-		catch (SocketException e1)
-		{
+		catch (SocketException e1) {
 			e1.printStackTrace();
 		}
-		catch (IOException ex)
-		{
+		catch (IOException ex) {
 			ex.printStackTrace();
 		}
 
 		r_Parent.redraw();
 	}
 
-	protected void sendSupportedMessages(ChildWrapper wrapper)
-	{
+	protected void sendSupportedMessages(ChildWrapper wrapper) {
 		PApplet child = wrapper.Child();
 		String childName = wrapper.GetName();
 
 		Foetus f = null;
 
-		try
-		{
+		try {
 			f = (Foetus) child.getClass().getField("f").get(child);
 		}
-		catch (Exception e)
-		{
+		catch (Exception e) {
 			r_Parent.println("CRASH: Accessing child's foetus failed!" + e.getMessage());
 		}
 
@@ -605,23 +550,21 @@ public class Mother
 		Enumeration<String> e = supportedMessages.elements();
 
 		OSCPortOut sender;
-		try
-		{
+		
+		try {
 			// (m_IP, m_osc_send_port)
 			InetAddress ip = InetAddress.getByName(m_IP);
 			sender = new OSCPortOut(ip, m_osc_send_port);
 
 			ArrayList<String> list = new ArrayList<String>();
-			for (Enumeration<String> ek = supportedMessages.keys(); ek.hasMoreElements();)
-			{
+			for (Enumeration<String> ek = supportedMessages.keys(); ek.hasMoreElements();) {
 				list.add(ek.nextElement());
 				list.add(e.nextElement());
 			}
 
 			Object args[] = new Object[list.size()];
 
-			for (int i = 0; i < list.size(); i++)
-			{
+			for (int i = 0; i < list.size(); i++) {
 				args[i] = list.get(i);
 			}
 
@@ -629,22 +572,18 @@ public class Mother
 
 			sender.send(msg);
 		}
-		catch (UnknownHostException e1)
-		{
+		catch (UnknownHostException e1)	{
 			e1.printStackTrace();
 		}
-		catch (SocketException e1)
-		{
+		catch (SocketException e1) {
 			e1.printStackTrace();
 		}
-		catch (IOException ex)
-		{
+		catch (IOException ex) {
 			ex.printStackTrace();
 		}
 	}
 
-	public void init()
-	{
+	public void init() {
 		// Useless initializations, unless the program doesn't fint the .ini file at all...
 		m_Width 		= 640;
 		m_Height 		= 480;
@@ -667,8 +606,7 @@ public class Mother
 	    }
 		
 
-		if (r_Parent.frame != null && m_FullScreen == true)
-		{
+		if (r_Parent.frame != null && m_FullScreen == true)	{
 			r_Parent.frame.removeNotify();// make the frame not displayable
 			r_Parent.frame.setResizable(false);
 			r_Parent.frame.setUndecorated(true);
@@ -677,18 +615,15 @@ public class Mother
 		}
 	}
 
-	static public void main(String args[])
-	{
+	static public void main(String args[]) {
 		int 		pos_X;
 		int 		pos_Y;
 
 		FileParser fp = new FileParser("data//mother" + ".ini");
 
 		// parse ini file if it exists
-		if (fp.fileExists())
-		{
-			if (fp.getIntValue("FullScreen") == 1)
-			{
+		if (fp.fileExists()) {
+			if (fp.getIntValue("FullScreen") == 1) {
 				int outputScreen = fp.getIntValue("outputScreen");
 
 				GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -697,13 +632,12 @@ public class Mother
 
 				Rectangle virtualBounds = new Rectangle();
 
-				if (devices.length > outputScreen)
-				{ // we have a 2nd display/projector
+				if (devices.length > outputScreen) { 
+					// we have a 2nd display/projector
 
 					GraphicsConfiguration[] gc = devices[outputScreen].getConfigurations();
 
-					if (gc.length > 0)
-					{
+					if (gc.length > 0) {
 						virtualBounds = gc[0].getBounds();
 					}
 
@@ -712,8 +646,8 @@ public class Mother
 					pos_X = virtualBounds.x;
 					pos_Y = virtualBounds.y;
 				}
-				else
-				{// leave on primary display
+				else {
+					// leave on primary display
 					location = "--location=0,0";
 
 					pos_X = 0;
@@ -722,17 +656,14 @@ public class Mother
 
 				PApplet.main(new String[] { location, "--hide-stop", /* display, */"Mother" });
 			}
-			else
-			{
+			else {
 				PApplet.main(new String[] { "Mother" });
 			}
 		}
 	}
 
-	private void callRegisteredMethod(ChildWrapper w, String parameter)
-	{
-		try
-		{
+	private void callRegisteredMethod(ChildWrapper w, String parameter)	{
+		try {
 			Class params[] 	= new Class[1];
 			params[0] 		= String.class;
 			
@@ -761,21 +692,17 @@ public class Mother
 			 * m.invoke(t, null);
 			 */
 		}
-		catch (Exception e)
-		{
+		catch (Exception e)	{
 			e.printStackTrace();
 		}
 	}
 
-	private void dealWithMessageStack()
-	{
-		synchronized (m_MessageStack)
-		{
+	private void dealWithMessageStack()	{
+		synchronized (m_MessageStack) {
 			Object[] args;
 			OscMessage theOscMessage;
 			OSCMessage m;
-			for (int i = 0; i < m_MessageStack.size(); i++)
-			{
+			for (int i = 0; i < m_MessageStack.size(); i++) {
 				m = m_MessageStack.get(i).message;
 				args = m.getArguments();
 
@@ -789,12 +716,9 @@ public class Mother
 		}
 	}
 
-	private void printFrameRate()
-	{
-		if (!firstProfiledFrame)
-		{
-			if (++profiledFrameCount == 30)
-			{
+	private void printFrameRate() {
+		if (!firstProfiledFrame) {
+			if (++profiledFrameCount == 30)	{
 				long endTimeMillis = System.currentTimeMillis();
 				double secs = (endTimeMillis - startTimeMillis) / 1000.0;
 				double fps = 30.0 / secs;
@@ -818,17 +742,14 @@ public class Mother
 				System.out.println(number);
 			}
 		}
-		else
-		{
+		else {
 			startTimeMillis = System.currentTimeMillis();
 			firstProfiledFrame = false;
 		}
 	}
 
-	private void handleImageRecording()
-	{
-		if (m_WriteImage)
-		{
+	private void handleImageRecording() {
+		if (m_WriteImage) {
 			// sendPicWritingStartedMessage();
 			// noLoop();
 			r_Parent.saveFrame(m_ImageFolder + "Mother-#####.png");
@@ -837,16 +758,12 @@ public class Mother
 		}
 	}
 
-	private void listenToOSC()
-	{
-		try
-		{
+	private void listenToOSC() {
+		try	{
 			OSCPortIn receiver = new OSCPortIn(m_osc_receive_port);
 
-			OSCListener listener = new OSCListener()
-			{
-				public void acceptMessage(java.util.Date time, OSCMessage message)
-				{
+			OSCListener listener = new OSCListener() {
+				public void acceptMessage(java.util.Date time, OSCMessage message) {
 					motherAcceptMessage(time, message);
 				}
 			};
@@ -854,8 +771,7 @@ public class Mother
 			receiver.addListener("/Mother/*", listener);
 			receiver.startListening();
 		}
-		catch (Exception e)
-		{
+		catch (Exception e)	{
 			r_Parent.println("Address already in use: Cannot bind");
 			System.exit(0);
 		}
@@ -864,20 +780,17 @@ public class Mother
 	/**
 	 * Loads the Settings from the Client INI file
 	 */
-	private void loadIniFile(String fileString)
-	{
+	private void loadIniFile(String fileString) {
 		fp = new FileParser(fileString);
 
 		// parse ini file if it exists
-		if (fp.fileExists())
-		{
+		if (fp.fileExists()) {
 			m_IP = fp.getStringValue("IP");
 			m_osc_receive_port = fp.getIntValue("osc_receive_port");
 			m_osc_send_port = fp.getIntValue("osc_send_port");
 			int[] localDim = fp.getIntValues("screenSize");
 //			m_OutputScreen = fp.getIntValue("outputScreen");
 
-			
 			m_Width = localDim[0];
 			m_Height = localDim[1];
 
@@ -900,28 +813,24 @@ public class Mother
 
 			String frameRateString = fp.getStringValue("frameRate");
 
-			m_FrameRate = Float.parseFloat(frameRateString);
-			m_ImageFolder = fp.getStringValue("imagePath");
+			m_FrameRate 	= Float.parseFloat(frameRateString);
+			m_ImageFolder 	= fp.getStringValue("imagePath");
 
 			String speedFractionString = fp.getStringValue("speedFraction");
 
 			m_SpeedFraction = Float.parseFloat(speedFractionString);
 
-			if (fp.getIntValue("stereo") == 1)
-			{
+			if (fp.getIntValue("stereo") == 1) {
 				m_Stereo = true;
 			}
-			else
-			{
+			else {
 				m_Stereo = false;
 			}
 			
-			if (fp.getIntValue("billboard") == 1)
-			{
+			if (fp.getIntValue("billboard") == 1) {
 				m_Billboard = true;
 			}
-			else
-			{
+			else {
 				m_Billboard = false;
 			}
 		}

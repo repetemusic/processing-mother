@@ -30,42 +30,28 @@ import processing.core.PGraphics;
 
 import foetus.*;
 
-public class SynthContainer {
-	ArrayList<URL> m_Visual_Synth_urls;
+public class SynthContainer extends SynthContainerBase {
+	ArrayList<URL> 				m_Visual_Synth_urls;
+	URL[] 						m_Library_file_URLS;
+	Hashtable<String, String> 	m_Visual_Synth_Names;
+	String 						m_Synth_Folder;
 
-	URL[] m_Library_file_URLS;
+	public URL[] 		get_Library_File_URLS() 	{return m_Library_file_URLS;}
+	Hashtable<String, 	String> get_Synth_Names() 	{return m_Visual_Synth_Names;}
 
-	Hashtable<String, String> m_Visual_Synth_Names;
-
-	ArrayList<ChildWrapper> m_VisualSynths;
-
-	ArrayList<ChildWrapper> Synths() {
-		return m_VisualSynths;
-	}
-
-	Hashtable<String, String> m_Visual_Synth_Keys;
-
-	String m_Synth_Folder;
-
-	URL[] get_Library_File_URLS() {
-		return m_Library_file_URLS;
-	}
-
-	Hashtable<String, String> get_Synth_Names() {
-		return m_Visual_Synth_Names;
-	}
-
+	/**
+	 * Constructor
+	 * @param folder
+	 */
 	public SynthContainer(String folder) {
-		m_VisualSynths 			= new ArrayList<ChildWrapper>();
 		m_Visual_Synth_Names 	= new Hashtable<String, String>();
-		m_Visual_Synth_Keys 	= new Hashtable<String, String>();
 		m_Synth_Folder 			= folder;
 
 		PopulateSynthURLS();
 		PopulateLibraryURLS();
 	}
 
-	/*
+	/**
 	 * Scans folder containing synths and stores URL for each
 	 */
 	private void PopulateSynthURLS() {
@@ -145,22 +131,16 @@ public class SynthContainer {
 		}
 	}
 
-	public boolean contains(String key) {
-		if (!m_Visual_Synth_Keys.containsKey(key)) {
-			return false;
-		}
-		else
-			return true;
-	}
-
 	/**
 	 * Loads a sketch from disk
 	 * @param classPath
 	 * @param className
 	 * @return
 	 */
-	
-	private PApplet LoadSketch(String classPath, String className, URL[] libraryURLS) {   
+	protected PApplet LoadSketch(String className) {   
+		URL[] libraryURLS 	= m_Library_file_URLS;
+		String classPath	= m_Synth_Folder;
+		
 		File dir1 = new File (".");
 	    
 		if(libraryURLS==null) {
@@ -172,6 +152,7 @@ public class SynthContainer {
 	      System.out.println ("Current dir : " + dir1.getCanonicalPath());
 	    }
 	    catch(Exception e) {	    	 
+	    
 	    }		
 	    
         File oooClassPath;
@@ -207,156 +188,9 @@ public class SynthContainer {
     } 
 	
 	/*
-	 * Create a new synth layer
-	 */
-	public ChildWrapper Add(String key, String sketchName, Mother mother) {
-		ChildWrapper new_Wrapper = null;
-		
-		if(!m_Visual_Synth_Keys.containsKey(key)) {		
-			PApplet child = null;
-						
-			child = LoadSketch(m_Synth_Folder, sketchName, m_Library_file_URLS);
-			
-			if(child!=null) {
-				new_Wrapper = new ChildWrapper(		child,										 
-													key, 
-													mother.getBillboardFlag(), // Render Billboard
-													mother);
-				m_VisualSynths.add( new_Wrapper );
-					
-				InitChild( new_Wrapper, mother );
-					
-				m_Visual_Synth_Keys.put(key, sketchName);
-			}
-		}	
-		
-		return new_Wrapper;
-	}
-
-	public ChildWrapper GetChildWrapper(String key)	{
-		ChildWrapper toReturn = null;
-
-		if (m_Visual_Synth_Keys.containsKey(key)) {
-			for (int i = 0; i < m_VisualSynths.size(); i++)	{
-				if (((ChildWrapper) m_VisualSynths.get(i)).GetName().compareTo(key) == 0) {
-					return (ChildWrapper) m_VisualSynths.get(i);
-				}
-			}
-		}
-
-		return toReturn;
-	}
-
-	public ChildWrapper Remove(String key) {
-		ChildWrapper toReturn = null;
-
-		if (m_Visual_Synth_Keys.containsKey(key)) {
-			for (int i = 0; i < m_VisualSynths.size(); i++)	{
-				if (((ChildWrapper) m_VisualSynths.get(i)).GetName().compareTo(key) == 0) {
-					toReturn = ((ChildWrapper) m_VisualSynths.get(i));
-
-					((ChildWrapper) m_VisualSynths.get(i)).Child().stop();
-
-					m_VisualSynths.remove(i);
-					break;
-				}
-			}
-
-			m_Visual_Synth_Keys.remove(key);
-
-			return toReturn;
-		}
-		else {
-			return toReturn;
-		}
-	}
-
-	public boolean reset() {
-		m_Visual_Synth_Keys.clear();
-		m_VisualSynths.clear();
-
-		return true;
-	}
-
-	public boolean Move(String key, int newLocation) {
-		if (m_Visual_Synth_Keys.containsKey(key)) {
-			for (int i = 0; i < m_VisualSynths.size(); i++)	{
-				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
-
-				if ((element.GetName().compareTo(key) == 0) &&
-						(m_VisualSynths.size() > newLocation)
-						&& (newLocation >= 0)) {
-					m_VisualSynths.remove(i);
-
-					m_VisualSynths.add(newLocation, element);
-					break;
-				}
-			}
-
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	public boolean Set_Synth_Blending(String key, int source, int dest)	{
-		if (m_Visual_Synth_Keys.containsKey(key)) {
-			for (int i = 0; i < m_VisualSynths.size(); i++)	{
-				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
-
-				if (element.GetName().compareTo(key) == 0)	{
-					/*
-					 * GL_ZERO 0 GL_ONE 1 GL_SRC_COLOR 768 GL_ONE_MINUS_SRC_COLOR 769 GL_DST_COLOR 774
-					 * GL_ONE_MINUS_DST_COLOR 775 GL_SRC_ALPHA 770 GL_ONE_MINUS_SRC_ALPHA 771 GL_DST_ALPHA 772
-					 * GL_ONE_MINUS_DST_ALPHA 773 GL_SRC_ALPHA_SATURATE 776 GL_CONSTANT_COLOR 32769
-					 * GL_ONE_MINUS_CONSTANT_COLOR 32770 GL_CONSTANT_ALPHA 32771 GL_ONE_MINUS_CONSTANT_ALPHA 32772
-					 */
-
-					element.SetBlending_Source(source);
-					element.SetBlending_Destination(dest);
-
-					break;
-				}
-			}
-
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	public void Initialize(Mother mother) {
-		for (int i = 0; i < m_VisualSynths.size(); i++) {
-			InitChild(((ChildWrapper) m_VisualSynths.get(i)), mother);
-		}
-	}
-
-	// private void initializeRegisteredMapField(ChildWrapper w)
-	// {
-	// try
-	// {
-	// Field sven;
-	//
-	// sven = (Field)((Class<? extends PApplet>)
-	// w.Child().getClass().getGenericSuperclass()).getDeclaredField("registerMap");
-	//
-	// sven.setAccessible(true);
-	//
-	// sven.set(w.Child(), w.Child().new HashMap<String, PApplet.RegisteredMethods>());
-	//
-	// }
-	// catch (Exception e)
-	// {
-	// e.printStackTrace();
-	// }
-	// }
-	//
-	/*
 	 * 
 	 */
-	private void InitChild(ChildWrapper cw, Mother parent)	{
+	protected void InitChild(ChildWrapper cw, Mother parent)	{
 		PApplet child = cw.Child();
 
 		Method[] methods 			= child.getClass().getMethods();
@@ -422,4 +256,25 @@ public class SynthContainer {
 
 		cw.getFoetusField().outgoing = kidPG;
 	}
+	
+	// private void initializeRegisteredMapField(ChildWrapper w)
+	// {
+	// try
+	// {
+	// Field sven;
+	//
+	// sven = (Field)((Class<? extends PApplet>)
+	// w.Child().getClass().getGenericSuperclass()).getDeclaredField("registerMap");
+	//
+	// sven.setAccessible(true);
+	//
+	// sven.set(w.Child(), w.Child().new HashMap<String, PApplet.RegisteredMethods>());
+	//
+	// }
+	// catch (Exception e)
+	// {
+	// e.printStackTrace();
+	// }
+	// }
+	//
 }
