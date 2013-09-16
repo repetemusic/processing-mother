@@ -30,7 +30,8 @@ import processing.core.PGraphics;
 
 import foetus.*;
 
-public class SynthContainer extends SynthContainerBase {
+//public class SynthLoader extends SynthContainerBase
+public class SynthLoader {
 	ArrayList<URL> 				m_Visual_Synth_urls;
 	URL[] 						m_Library_file_URLS;
 	Hashtable<String, String> 	m_Visual_Synth_Names;
@@ -43,7 +44,7 @@ public class SynthContainer extends SynthContainerBase {
 	 * Constructor
 	 * @param folder
 	 */
-	public SynthContainer(String folder) {
+	public SynthLoader(String folder) {
 		m_Visual_Synth_Names 	= new Hashtable<String, String>();
 		m_Synth_Folder 			= folder;
 

@@ -60,7 +60,8 @@ public class Mother {
 	private int 			m_osc_send_port;
 	private int 			m_osc_receive_port;
 	private String 			m_IP;
-	private SynthContainer 	m_SynthContainer;
+	private SynthLoader 	m_SynthLoader;
+	private SynthContainerBase 	m_SynthContainer;
 	private String 			m_Synth_Folder;
 	private int 			m_Width;
 	private int 			m_Height;
@@ -120,7 +121,8 @@ public class Mother {
 		
 		r_Parent.frameRate(m_FrameRate / m_SpeedFraction);
 
-		m_SynthContainer 	= new SynthContainer(m_Synth_Folder);
+		m_SynthLoader 		= new SynthLoader(m_Synth_Folder);
+		m_SynthContainer	= new SynthContainerBase();
 		m_MessageStack 		= new ArrayList<Message>();
 
 		listenToOSC();
@@ -174,7 +176,7 @@ public class Mother {
 		gl2.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		synchronized (m_SynthContainer)	{
+		synchronized (m_SynthLoader)	{
 			PGraphics previous = null;
 			
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
@@ -315,7 +317,7 @@ public class Mother {
 
 		/* check if theOscMessage has the address pattern we are looking for. */
 		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))	{
-			synchronized (m_SynthContainer)	{
+			synchronized (m_SynthLoader)	{
 				if (splits[2].compareTo("Get_synth_names") == 0) {
 					OSCPortOut sender;
 					
@@ -324,7 +326,7 @@ public class Mother {
 						ArrayList<String> list = new ArrayList<String>();
 						sender = new OSCPortOut(ip, m_osc_send_port);
 						
-						for (Enumeration<String> e = m_SynthContainer.get_Synth_Names().keys(); e.hasMoreElements();) {
+						for (Enumeration<String> e = m_SynthLoader.get_Synth_Names().keys(); e.hasMoreElements();) {
 							list.add(e.nextElement());
 						}
 
@@ -353,7 +355,7 @@ public class Mother {
 
 							ChildWrapper wrapper = m_SynthContainer.Add(	theOscMessage.get(1).stringValue(), 
 																			theOscMessage.get(0).stringValue(),
-																			m_SynthContainer,
+																			m_SynthLoader,
 																			this);
 
 							if(wrapper!=null) {
@@ -373,7 +375,7 @@ public class Mother {
 
 							ChildWrapper wrapper = m_SynthContainer.Add(	theOscMessage.get(2).stringValue(), 
 																			theOscMessage.get(1).stringValue(),
-																			m_SynthContainer,
+																			m_SynthLoader,
 																			this);
 
 							if(wrapper!=null) {
@@ -414,8 +416,8 @@ public class Mother {
 					}
 
 					for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
-						child = ((ChildWrapper) m_SynthContainer.Synths().get(i)).Child();
-						childName = ((ChildWrapper) m_SynthContainer.Synths().get(i)).GetName();
+						child 		= ((ChildWrapper) m_SynthContainer.Synths().get(i)).Child();
+						childName 	= ((ChildWrapper) m_SynthContainer.Synths().get(i)).GetName();
 
 						if (childName.compareTo(splits[3]) == 0) {
 							if (splits[4].compareTo("Get_Supported_Messages") == 0)	{
