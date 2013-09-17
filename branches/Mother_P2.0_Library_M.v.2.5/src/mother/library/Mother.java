@@ -32,7 +32,7 @@ import oscP5.*;
 import mpe.config.FileParser;
 
 import javax.media.opengl.*;
-import javax.media.opengl.glu.*;
+//import javax.media.opengl.glu.*;
 
 import com.illposed.osc.OSCListener;
 import com.illposed.osc.OSCMessage;
@@ -117,7 +117,7 @@ public class Mother {
 			first_run=false;
 		}
 
-		r_Parent.size(m_Width, m_Height, r_Parent.P3D);
+		r_Parent.size(m_Width, m_Height, PConstants.P3D);
 		
 		r_Parent.frameRate(m_FrameRate / m_SpeedFraction);
 
@@ -158,59 +158,104 @@ public class Mother {
 		child.key 			= r_Parent.key;
 	}
 
+	// //For testing (getting opengl state)
+	// IntBuffer arg1 = IntBuffer.allocate(1);
+	// opengl.glGetIntegerv(GL.GL_BLEND_DST, arg1);
+	// println(arg1.get(0));
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see processing.core.PApplet#draw()
 	 */
 	public void draw() {		
-		ChildWrapper current;
-	
-		dealWithMessageStack(); // Dealing with message stack
+		ChildWrapper 	current 		= null;
+		ChildWrapper 	currentChild	= null;
+		PGraphics 		previousChild	= null;
+		PGraphics 		previous		= null;
+		PGraphicsOpenGL pgl 			= (PGraphicsOpenGL) r_Parent.g;
+		PGL 			gl 				= pgl.beginPGL();
+		GL2 			gl2 			= gl.gl.getGL2();
 
-		PGraphicsOpenGL pgl = (PGraphicsOpenGL) r_Parent.g;
-		PGL 			gl 	= pgl.beginPGL();
-		GL2 			gl2 = gl.gl.getGL2();
+		dealWithMessageStack(); // Dealing with message stack
 		
 		// Set The Clear Color To Black
-		gl2.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		synchronized (m_SynthLoader)	{
-			PGraphics previous = null;
-			
+		synchronized (m_SynthLoader) {			
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
 
 				PreDrawChildUpdate(current.Child());
-
 				callRegisteredMethod(current, "pre");
 
 				gl2.glEnable(GL.GL_BLEND);
-
 				// opengl.glDisable(GL.GL_DEPTH_TEST); // Disables Depth Testing
-
-				// //For testing (getting opengl state)
-				// IntBuffer arg1 = IntBuffer.allocate(1);
-				// opengl.glGetIntegerv(GL.GL_BLEND_DST, arg1);
-				// println(arg1.get(0));
-
 				pgl.colorMode(r_Parent.RGB, 255);
 
 				r_Parent.pushMatrix();
-
-				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
-
 				r_Parent.pushStyle();
-					
+				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
 				gl2.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
 
-				current.foetusField.incoming = previous;
+//				current.foetusField.incoming = previous;											
+//				current.draw(m_Stereo);
+							
+				if(current.Synths().size()>0) {
+					current.foetusField.incoming = null;
+					
+					current.draw(m_Stereo);
+							
+					for (int kid_i = 0; kid_i < current.Synths().size(); kid_i++) {
+						currentChild  = (ChildWrapper) current.Synths().get(kid_i);
+						
+						if(kid_i == 0) {
+							currentChild.foetusField.incoming = current.foetusField.outgoing;
+						} 
+						else {
+							currentChild.foetusField.incoming = previousChild;
+						}
+						
+						currentChild.draw(m_Stereo);
+						previousChild = currentChild.foetusField.outgoing;
+					}
+	
+					current.foetusField.startDrawing();
+					current.Child().blendMode(r_Parent.ADD);
+					current.Child().image(previous, 
+							0,
+							0, 
+							r_Parent.width, 
+							r_Parent.height);
+					
+					current.Child().image(currentChild.foetusField.outgoing, 
+							0,
+							0, 
+							r_Parent.width, 
+							r_Parent.height);
+					current.foetusField.endDrawing();
+					
+					previous = current.foetusField.outgoing;
+				}
+				else {
+					// Drawing previous sketch into current one
+//					current.foetusField.startDrawing();
+//					current.Child().clear();
+//					
+//					if(current.foetusField.incoming!=null) {
+////						current.Child().blendMode(current.Child().BLEND);
+//						current.Child().tint(255,255,255,255);
+//						current.Child().image(current.foetusField.incoming, 0, 0, current.Child().width, current.Child().height);
+//					}							
+//					
+//					current.foetusField.endDrawing();
+					
+					current.foetusField.incoming = previous;
+					current.draw(m_Stereo);
+					previous = current.foetusField.outgoing;
+				}
 				
-				previous = current.foetusField.outgoing;
-								
-				current.draw(m_Stereo);
-
 //				r_Parent.image(current.foetusField.outgoing, 
 //						0, 
 //						0, 
@@ -218,22 +263,27 @@ public class Mother {
 //						r_Parent.height);
 				
 				callRegisteredMethod(current, "draw");
-
+				
 				gl2.glPopAttrib();
-					
 				r_Parent.popStyle();
-
 				r_Parent.popMatrix();
-
 				gl2.glDisable(GL.GL_BLEND);
 
 				callRegisteredMethod(current, "post");
 			}
 
+			// If there are any synths:
+			// 	Draw the output of the last one!
 			if(m_SynthContainer.Synths().size()>0) {
-				current = (ChildWrapper) m_SynthContainer.Synths().get(m_SynthContainer.Synths().size()-1);
-	
-				r_Parent.image(current.foetusField.outgoing, 
+//				current = (ChildWrapper) m_SynthContainer.Synths().get(m_SynthContainer.Synths().size()-1);
+//	
+//				r_Parent.image(current.foetusField.outgoing, 
+//						0, 
+//						0, 
+//						r_Parent.width, 
+//						r_Parent.height);
+				
+				r_Parent.image(previous, 
 						0, 
 						0, 
 						r_Parent.width, 
@@ -317,7 +367,7 @@ public class Mother {
 
 		/* check if theOscMessage has the address pattern we are looking for. */
 		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))	{
-			synchronized (m_SynthLoader)	{
+			synchronized (m_SynthLoader) {
 				if (splits[2].compareTo("Get_synth_names") == 0) {
 					OSCPortOut sender;
 					
@@ -368,22 +418,27 @@ public class Mother {
 				}
 				else if (splits[2].compareTo("Add_ChildSynth") == 0)	{
 					if (theOscMessage.checkTypetag("sss")) {
-						if (!m_SynthContainer.contains(theOscMessage.get(1).stringValue()))	{
-							String parentSynthID = theOscMessage.get(1).stringValue();
-							
-							r_Parent.noLoop();
+						String parentSynthID = theOscMessage.get(0).stringValue();
+						
+						r_Parent.noLoop();
 
-							ChildWrapper wrapper = m_SynthContainer.Add(	theOscMessage.get(2).stringValue(), 
-																			theOscMessage.get(1).stringValue(),
-																			m_SynthLoader,
-																			this);
-
-							if(wrapper!=null) {
-								sendSupportedMessages(wrapper);
+						ChildWrapper parentWrapper 	= m_SynthContainer.GetChildWrapper(parentSynthID);
+						ChildWrapper wrapper 		= null;
+						
+						if(parentWrapper!=null) {
+							if (!parentWrapper.contains(theOscMessage.get(2).stringValue()))	{
+								wrapper = parentWrapper.Add(	theOscMessage.get(2).stringValue(), 
+																theOscMessage.get(1).stringValue(),
+																m_SynthLoader,
+																this);
 							}
-
-							r_Parent.loop();
 						}
+							
+						if(wrapper!=null) {
+							sendSupportedMessages(wrapper);
+						}
+
+						r_Parent.loop();
 					}
 				}
 				else if (splits[2].compareTo("Reset") == 0)	{

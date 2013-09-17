@@ -30,29 +30,28 @@ import java.util.*;
 import megamu.shapetween.Tween;
 
 public class Foetus {
-	public PGraphics incoming;
-	public PGraphics outgoing;
-	
-	PApplet parent;
-	
-	int[] m_BGColor;
-	
-	Hashtable<String, String> m_Messages;
-	
-	Hashtable<String, Boolean> m_Updating;
-	
 	/**
 	 * For use by Mother, do not alter!
 	 */
 	public boolean standalone = true;
 
+	public PGraphics incoming;
+	public PGraphics outgoing;
+	public final String VERSION = "0.5.0";
+	
+	PApplet parent;
+	
+	int[] m_BGColor;
+	
+	Hashtable<String, String> 	m_Messages;
+	Hashtable<String, Boolean> 	m_Updating;
+	ArrayList<FoetusParameter> 	m_Parameters;
+	
 	float m_SpeedFraction = 1;
-	
-	public final String VERSION = "0.4.0";
-	
-	ArrayList<FoetusParameter> m_Parameters;
-	
+		
 	public ArrayList<FoetusParameter> getParameters() { return m_Parameters; }
+	
+	PGraphics old_g = null;
 	
 	/**
 	 * Constructor
@@ -207,8 +206,20 @@ public class Foetus {
 //		System.out.println("Post: " + parent.toString());
 	}
 	
-	
 	public void addParameter(FoetusParameter f)	{
 		m_Parameters.add(f);	
+	}
+	
+	public void startDrawing() {
+		old_g = parent.g;
+		outgoing.beginDraw();
+		parent.g = outgoing;
+//		parent.g.clear();
+	}
+	
+	public void endDrawing() {
+		outgoing.endDraw();
+		parent.g = old_g;
+		old_g = null;
 	}
 }

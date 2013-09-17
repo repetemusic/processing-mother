@@ -1,36 +1,16 @@
 package mother.library;
 
-import java.text.NumberFormat;
-import java.util.*;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.*;
-import java.net.InetAddress;
-import java.net.SocketException;
 import java.net.URLClassLoader;
-import java.net.UnknownHostException;
-
-import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
 import processing.core.PApplet;
 import processing.core.PGraphics;
-
-//import processing.core.PApplet.RegisteredMethods;
-
 import foetus.*;
 
-//public class SynthLoader extends SynthContainerBase
 public class SynthLoader {
 	ArrayList<URL> 				m_Visual_Synth_urls;
 	URL[] 						m_Library_file_URLS;
@@ -158,6 +138,7 @@ public class SynthLoader {
 	    
         File oooClassPath;
         
+        // Weird, why are they the samee? :)
         if (System.getProperty("os.name").toLowerCase().indexOf("mac") != -1)
         	oooClassPath = new File(classPath + "//" + className + ".jar"); // Mac
         else 
@@ -257,25 +238,4 @@ public class SynthLoader {
 
 		cw.getFoetusField().outgoing = kidPG;
 	}
-	
-	// private void initializeRegisteredMapField(ChildWrapper w)
-	// {
-	// try
-	// {
-	// Field sven;
-	//
-	// sven = (Field)((Class<? extends PApplet>)
-	// w.Child().getClass().getGenericSuperclass()).getDeclaredField("registerMap");
-	//
-	// sven.setAccessible(true);
-	//
-	// sven.set(w.Child(), w.Child().new HashMap<String, PApplet.RegisteredMethods>());
-	//
-	// }
-	// catch (Exception e)
-	// {
-	// e.printStackTrace();
-	// }
-	// }
-	//
 }
