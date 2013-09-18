@@ -160,7 +160,7 @@ public class SynthContainer
 	 * @param dest
 	 * @return
 	 */
-	public boolean Set_Synth_Blending(String key, int source, int dest)	{
+	public boolean Set_BlendMode(String key, int mode)	{
 		if (m_Visual_Synth_Keys.containsKey(key)) {
 			for (int i = 0; i < m_VisualSynths.size(); i++)	{
 				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
@@ -173,8 +173,10 @@ public class SynthContainer
 					 * GL_ONE_MINUS_CONSTANT_COLOR 32770 GL_CONSTANT_ALPHA 32771 GL_ONE_MINUS_CONSTANT_ALPHA 32772
 					 */
 
-					element.SetBlending_Source(source);
-					element.SetBlending_Destination(dest);
+					element.SetBlendMode(mode);
+					
+//					element.SetBlending_Source(source);
+//					element.SetBlending_Destination(dest);
 
 					break;
 				}

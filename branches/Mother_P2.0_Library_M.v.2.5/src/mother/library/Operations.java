@@ -10,6 +10,8 @@ import java.util.Hashtable;
 
 import oscP5.OscMessage;
 import processing.core.PApplet;
+import processing.core.PConstants;
+
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
 
@@ -41,8 +43,8 @@ public class Operations
 					Remove_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Move_ChildSynth") == 0)
 					Move_ChildSynth(theOscMessage);
-				else if (splits[2].compareTo("Set_synth_blending") == 0)
-					SetSynthBlending(theOscMessage);
+				else if (splits[2].compareTo("Set_BlendMode") == 0)
+					SetBlendMode(theOscMessage);
 				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4)
 					Child(theOscMessage, splits);
 				else if (splits[2].compareTo("Record") == 0)
@@ -166,8 +168,7 @@ public class Operations
 			String parentSynthID = theOscMessage.get(0).stringValue();
 
 			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
-			ChildWrapper wrapper 		= null;
-			
+		
 			if(parentWrapper!=null) {
 				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
 					parentWrapper.Move(theOscMessage.get(1).stringValue(), theOscMessage.get(2).intValue());
@@ -207,8 +208,8 @@ public class Operations
 						oscEventMethod.invoke(child, new Object[] { theOscMessage });
 					}
 					catch (Exception e)	{
-						r_M.GetParent().println("CRASH Child oscEvent" + childName + e.getStackTrace());
-						r_M.GetParent().println(e.getStackTrace());
+						PApplet.println("CRASH Child oscEvent" + childName + e.getStackTrace());
+						PApplet.println(e.getStackTrace());
 					}
 				}
 
@@ -232,10 +233,46 @@ public class Operations
 		}
 	}
 	
-	private void SetSynthBlending(OscMessage theOscMessage) {
-		if (theOscMessage.checkTypetag("sii")) {
-			r_M.GetSynthContainer().Set_Synth_Blending(theOscMessage.get(0).stringValue(), theOscMessage.get(1)
-					.intValue(), theOscMessage.get(2).intValue());
+	private void SetBlendMode(OscMessage theOscMessage) {
+		if (theOscMessage.checkTypetag("si")) {
+			
+			/*
+			 *	BLEND - linear interpolation of colours: C = A*factor + B. This is the default blending mode.
+			 *	ADD - additive blending with white clip: C = min(A*factor + B, 255)
+			 *	SUBTRACT - subtractive blending with black clip: C = max(B - A*factor, 0)
+			 *	DARKEST - only the darkest colour succeeds: C = min(A*factor, B)
+			 *	LIGHTEST - only the lightest colour succeeds: C = max(A*factor, B)
+			 *	DIFFERENCE - subtract colors from underlying image.
+			 *	EXCLUSION - similar to DIFFERENCE, but less extreme.
+			 *	MULTIPLY - multiply the colors, result will always be darker.
+			 *	SCREEN - opposite multiply, uses inverse values of the colors.
+			 *	REPLACE - the pixels entirely replace the others and don't utilize alpha (transparency) values 
+			 */
+			
+			int mode = 1;
+			
+			if(theOscMessage.get(1).intValue() == 1)
+				mode = PConstants.BLEND;
+			else if(theOscMessage.get(1).intValue() == 2)
+				mode = PConstants.ADD;
+			else if(theOscMessage.get(1).intValue() == 3)
+				mode = PConstants.SUBTRACT;
+			else if(theOscMessage.get(1).intValue() == 4)
+				mode = PConstants.DARKEST;
+			else if(theOscMessage.get(1).intValue() == 5)
+				mode = PConstants.LIGHTEST;
+			else if(theOscMessage.get(1).intValue() == 6)
+				mode = PConstants.DIFFERENCE;
+			else if(theOscMessage.get(1).intValue() == 7)
+				mode = PConstants.EXCLUSION;
+			else if(theOscMessage.get(1).intValue() == 8)
+				mode = PConstants.MULTIPLY;
+			else if(theOscMessage.get(1).intValue() == 9)
+				mode = PConstants.SCREEN;
+			else if(theOscMessage.get(1).intValue() == 10)
+				mode = PConstants.REPLACE;
+			
+			r_M.GetSynthContainer().Set_BlendMode(theOscMessage.get(0).stringValue(), mode);
 		}
 	}
 	
@@ -253,7 +290,7 @@ public class Operations
 			f = (Foetus) child.getClass().getField("f").get(child);
 		}
 		catch (Exception e) {
-			r_M.GetParent().println("CRASH: Accessing child's foetus failed!" + e.getMessage());
+			PApplet.println("CRASH: Accessing child's foetus failed!" + e.getMessage());
 		}
 
 		Hashtable<String, String> supportedMessages = f.getSupportedMessages();

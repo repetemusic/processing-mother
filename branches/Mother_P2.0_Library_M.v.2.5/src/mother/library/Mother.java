@@ -140,17 +140,11 @@ public class Mother {
 //		pgl.endPGL();
 	}
 
-	public void pre() {
-		
-	}
+	public void pre() {}
 
-	public void post() {
-		
-	}
+	public void post() {}
 
-	public void dispose() {
-		System.out.println("Disposed of."); 
-	}
+	public void dispose() { System.out.println("Disposed of."); }
 
 	/*
 	 * 
@@ -178,15 +172,15 @@ public class Mother {
 		ChildWrapper 	currentChild	= null;
 		PGraphics 		previousChild	= null;
 		PGraphics 		previous		= null;
-		
 		PGraphicsOpenGL pgl 			= (PGraphicsOpenGL) r_Parent.g;
 		PGL 			gl 				= pgl.beginPGL();
 		GL2 			gl2 			= gl.gl.getGL2();
 	
+		int width 	= r_Parent.width;
+		int height 	= r_Parent.height;
+		
 		if(m_synthOutputStack == null)
-			m_synthOutputStack = r_Parent.createGraphics(	r_Parent.width, 
-															r_Parent.height, 
-															r_Parent.OPENGL);
+			m_synthOutputStack = r_Parent.createGraphics(width, height, r_Parent.OPENGL);
 
 		dealWithMessageStack(); // Dealing with message stack
 		
@@ -194,11 +188,11 @@ public class Mother {
 		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		synchronized (m_SynthLoader) {
-			m_synthOutputStack.beginDraw();
-			m_synthOutputStack.clear();
-			m_synthOutputStack.endDraw();
-			
+		m_synthOutputStack.beginDraw();
+		m_synthOutputStack.clear();
+		m_synthOutputStack.endDraw();
+		
+		synchronized (m_SynthLoader) {		
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
 
@@ -241,39 +235,23 @@ public class Mother {
 					 * Also, it only does something if ADD blending is used.
 					 */
 					if(previous != null) {
-						current.Child().image(	previous, 
-												0,
-												0, 
-												r_Parent.width, 
-												r_Parent.height);
+						current.Child().image(	previous, 0, 0, width, height);
 					}
 					
-					current.Child().image(currentChild.foetusField.outgoing, 
-							0,
-							0, 
-							r_Parent.width, 
-							r_Parent.height);
+					current.Child().image(currentChild.foetusField.outgoing, 0, 0, width, height);
 					current.foetusField.endDrawing();
 				}
 								
 				m_synthOutputStack.beginDraw();
-				m_synthOutputStack.blendMode(m_synthOutputStack.BLEND);				  
-				m_synthOutputStack.image(current.foetusField.outgoing, 
-							0,
-							0, 
-							m_synthOutputStack.width, 
-							m_synthOutputStack.height);
+				m_synthOutputStack.blendMode(current.GetBlendMode());				  
+				m_synthOutputStack.image(current.foetusField.outgoing, 0, 0, width, height);
 				/*
 				 * This is a compromise for the moment, and only expected to be used 
 				 * with Processing 2.0.2, in 2.0.3 it looks wrong I think.
 				 * I should implement a solution that deals with repeated blending,
 				 * when I find the time.
 				 */
-				m_synthOutputStack.image(current.foetusField.outgoing, 
-							0,
-							0, 
-							m_synthOutputStack.width, 
-							m_synthOutputStack.height);
+				m_synthOutputStack.image(current.foetusField.outgoing, 0,	0, width, height);
 				m_synthOutputStack.endDraw();
 				
 				previous = current.foetusField.outgoing;
@@ -288,12 +266,7 @@ public class Mother {
 				callRegisteredMethod(current, "post");
 			}
 
-						
-			r_Parent.image(m_synthOutputStack, 
-						0, 
-						0, 
-						r_Parent.width, 
-						r_Parent.height);
+			r_Parent.image(m_synthOutputStack, 0, 0, width, height);
 		}
 
 		// float m = millis(); // For timing image recording
