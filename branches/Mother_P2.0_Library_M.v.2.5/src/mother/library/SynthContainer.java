@@ -188,4 +188,27 @@ public class SynthContainer
 			return false;
 		}
 	}
+	
+	public boolean SetAlpha(String key, float a)	{
+		if (m_Visual_Synth_Keys.containsKey(key)) {
+			for (int i = 0; i < m_VisualSynths.size(); i++)	{
+				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
+
+				if (element.GetName().compareTo(key) == 0)	{
+					element.SetAlpha(a);
+					break;
+				}
+			}
+
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public void SetAlpha(int index, float a)	{
+		ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(index));
+		element.SetAlpha(a);
+	}
 }

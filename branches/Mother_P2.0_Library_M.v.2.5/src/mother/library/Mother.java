@@ -226,8 +226,9 @@ public class Mother {
 					// I draw it into the PGrapics of the parent synth:
 					current.foetusField.startDrawing();
 					current.Child().clear();
-					current.Child().blendMode(r_Parent.BLEND);
-
+					current.Child().tint(255, 255.0f*currentChild.GetAlpha());
+					current.Child().blendMode(currentChild.GetBlendMode());
+					
 					/*
 					 * This I only need if I don't fix the GlowBlur effect thing.
 					 * Really it should preserve transparency.
@@ -243,6 +244,7 @@ public class Mother {
 				}
 								
 				m_synthOutputStack.beginDraw();
+				m_synthOutputStack.tint(255, 255.0f*current.GetAlpha());
 				m_synthOutputStack.blendMode(current.GetBlendMode());				  
 				m_synthOutputStack.image(current.foetusField.outgoing, 0, 0, width, height);
 				/*

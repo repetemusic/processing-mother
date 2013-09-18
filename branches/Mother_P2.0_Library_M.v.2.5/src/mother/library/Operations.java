@@ -45,6 +45,12 @@ public class Operations
 					Move_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Set_BlendMode") == 0)
 					SetBlendMode(theOscMessage);
+				else if (splits[2].compareTo("Set_Alpha") == 0)
+					SetAlpha(theOscMessage);
+				else if (splits[2].compareTo("Set_ChildBlendMode") == 0)
+					SetChildBlendMode(theOscMessage);
+				else if (splits[2].compareTo("Set_ChildAlpha") == 0)
+					SetChildAlpha(theOscMessage);
 				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4)
 					Child(theOscMessage, splits);
 				else if (splits[2].compareTo("Record") == 0)
@@ -273,6 +279,84 @@ public class Operations
 				mode = PConstants.REPLACE;
 			
 			r_M.GetSynthContainer().Set_BlendMode(theOscMessage.get(0).stringValue(), mode);
+		}
+	}
+	
+	private void SetAlpha(OscMessage theOscMessage) {
+		if (theOscMessage.checkTypetag("sf")) {
+			r_M.GetSynthContainer().SetAlpha(
+					theOscMessage.get(0).stringValue(), 
+					theOscMessage.get(1).floatValue()
+					);
+		}
+		else if (theOscMessage.checkTypetag("if")) {
+			r_M.GetSynthContainer().SetAlpha(
+					theOscMessage.get(0).intValue(), 
+					theOscMessage.get(1).floatValue()
+					);
+		}
+	}
+	
+	
+	private void SetChildBlendMode(OscMessage theOscMessage) {
+		if (theOscMessage.checkTypetag("ssi")) {
+			int mode = 1;
+			
+			if(theOscMessage.get(2).intValue() == 1)
+				mode = PConstants.BLEND;
+			else if(theOscMessage.get(2).intValue() == 2)
+				mode = PConstants.ADD;
+			else if(theOscMessage.get(2).intValue() == 3)
+				mode = PConstants.SUBTRACT;
+			else if(theOscMessage.get(2).intValue() == 4)
+				mode = PConstants.DARKEST;
+			else if(theOscMessage.get(2).intValue() == 5)
+				mode = PConstants.LIGHTEST;
+			else if(theOscMessage.get(2).intValue() == 6)
+				mode = PConstants.DIFFERENCE;
+			else if(theOscMessage.get(2).intValue() == 7)
+				mode = PConstants.EXCLUSION;
+			else if(theOscMessage.get(2).intValue() == 8)
+				mode = PConstants.MULTIPLY;
+			else if(theOscMessage.get(2).intValue() == 9)
+				mode = PConstants.SCREEN;
+			else if(theOscMessage.get(2).intValue() == 10)
+				mode = PConstants.REPLACE;
+			
+			String parentSynthID = theOscMessage.get(0).stringValue();
+			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
+			if(parentWrapper!=null) {
+				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
+					parentWrapper.Set_BlendMode(theOscMessage.get(1).stringValue(), mode);
+				}
+			}
+		}
+	}
+	
+	private void SetChildAlpha(OscMessage theOscMessage) {
+		if (theOscMessage.checkTypetag("ssf")) {
+			String parentSynthID = theOscMessage.get(0).stringValue();
+			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
+			if(parentWrapper!=null) {
+				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
+					parentWrapper.SetAlpha(
+							theOscMessage.get(1).stringValue(), 
+							theOscMessage.get(2).floatValue()
+							);
+				}
+			}
+			
+		}
+		else if (theOscMessage.checkTypetag("sif")) {
+			String parentSynthID = theOscMessage.get(0).stringValue();
+			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
+			if(parentWrapper!=null) {
+				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
+					parentWrapper.SetAlpha(
+							theOscMessage.get(1).intValue(), 
+							theOscMessage.get(2).floatValue()
+							);				}
+			}
 		}
 	}
 	

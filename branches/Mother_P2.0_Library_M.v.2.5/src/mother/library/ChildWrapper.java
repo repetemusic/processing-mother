@@ -17,20 +17,18 @@ public class ChildWrapper extends SynthContainer {
 	PApplet 		m_Child; 
 	Mother  		r_Mother;		
 	boolean 		m_RenderBillboard = true;
-//	int 			m_Blending_Source;
-//	int				m_Blending_Destination;
 	String 			m_Name;
 	Foetus 			foetusField;
 	
 	int				m_BlendMode = 1;
+	float			m_Alpha		= 1.0f;
+	
+	public float 	GetAlpha() 			{ return m_Alpha; }
+	public void 	SetAlpha(float a) 	{ m_Alpha = a; }
 	
 	public PApplet 	Child()								{ return m_Child;	}
 	public boolean 	GetRenderBillboard()				{ return m_RenderBillboard; }
 	public void	   	SetRenderBillboard(boolean rB)		{ m_RenderBillboard = rB; }
-//	public int 		GetBlending_Source()				{ return m_Blending_Source; }
-//	public void		SetBlending_Source(int source)		{ m_Blending_Source = source; }
-//	public int 		GetBlending_Destination()			{ return m_Blending_Destination; }
-//	public void		SetBlending_Destination(int dest)	{ m_Blending_Destination = dest; }
 	public int 		GetBlendMode()						{ return m_BlendMode; }
 	public void		SetBlendMode(int mode)				{ m_BlendMode = mode; }
 	
