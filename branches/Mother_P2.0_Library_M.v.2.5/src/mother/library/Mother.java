@@ -57,52 +57,42 @@ import foetus.*;
 public class Mother {
 	public final static String VERSION = "##library.prettyVersion##";
 	
-	private int 			m_osc_send_port;
-	private int 			m_osc_receive_port;
-	private String 			m_IP;
-	private SynthLoader 	m_SynthLoader;
-	private SynthContainer 	m_SynthContainer;
-	private String 			m_Synth_Folder;
-	private int 			m_Width;
-	private int 			m_Height;
-	private FileParser 		fp;
-	private PrintWriter 	output;
-	private boolean 		m_FullScreen;
-	private boolean 		m_WriteImage = false;
-	private float 			m_FrameRate = 30f;
-	private String 			m_ImageFolder;
-	private float 			m_SpeedFraction;
-	private boolean 		firstProfiledFrame; // Frames-per-second computation
-	private int 			profiledFrameCount;
-	private long 			startTimeMillis;
-	private boolean 		m_Stereo;
-	private boolean 		m_Billboard;
-		
-	static boolean 			first_run = true; 	// For debugging crash with registered methods.
+	private int 				m_osc_send_port;
+	private int 				m_osc_receive_port;
+	private String 				m_IP;
+	private SynthLoader 		m_SynthLoader;
+	private SynthContainer 		m_SynthContainer;
+	private String 				m_Synth_Folder;
+	private int 				m_Width;
+	private int 				m_Height;
+	private FileParser 			fp;
+	private PrintWriter 		output;
+	private boolean 			m_FullScreen;
+	private boolean 			m_WriteImage = false;
+	private float 				m_FrameRate = 30f;
+	private String	 			m_ImageFolder;
+	private float 				m_SpeedFraction;
+	private boolean 			firstProfiledFrame; // Frames-per-second computation
+	private int 				profiledFrameCount;
+	private long 				startTimeMillis;
+	private boolean 			m_Stereo;
+	private boolean		 		m_Billboard;
+	static 	boolean 			first_run = true; 	// For debugging crash with registered methods.
+	private ArrayList<Message> 	m_MessageStack;
+	private PGraphics 			m_synthOutputStack = null;
+	private Operations 			m_Operations;
+	private PApplet 			r_Parent;
 	
-	ArrayList<Message> m_MessageStack;
-
-	private PGraphics m_synthOutputStack = null;
-	
-	private Operations m_Operations;
-	
-	PApplet r_Parent;
-	
-	public String 			GetIP() 			{ return m_IP;}
-	public int				GetOSCSendPort()	{ return m_osc_send_port; }
-	public int				GetOSCReceivePort()	{ return m_osc_receive_port; }
-	public SynthLoader		GetSynthLoader() 	{ return m_SynthLoader; }
-	public SynthContainer	GetSynthContainer() { return m_SynthContainer; }
-
-	public boolean 	GetWriteImage() 					{ return m_WriteImage; }
-	public void 	SetWriteImage(boolean writeImage)	{ this.m_WriteImage = writeImage;	}
-	
-	public float 	getSpeedFraction()	{	return m_SpeedFraction;	}
-	public boolean	getBillboardFlag()	{	return m_Billboard; }
-
-	PApplet GetParent() { return r_Parent; }
-	
-	public Mother(PApplet parent) { r_Parent = parent; }
+	public String 			GetIP() 							{ return m_IP;}
+	public int				GetOSCSendPort()					{ return m_osc_send_port; }
+	public int				GetOSCReceivePort()					{ return m_osc_receive_port; }
+	public SynthLoader		GetSynthLoader() 					{ return m_SynthLoader; }
+	public SynthContainer	GetSynthContainer() 				{ return m_SynthContainer; }	
+	public boolean 			GetWriteImage() 					{ return m_WriteImage; }
+	public void 			SetWriteImage(boolean writeImage)	{ this.m_WriteImage = writeImage;	}
+	public float 			getSpeedFraction()					{ return m_SpeedFraction;	}
+	public boolean			getBillboardFlag()					{ return m_Billboard; }
+	public PApplet 			GetParent() 						{ return r_Parent; }
 	
 	public int getChildWidth() {
 		if(m_Stereo)
@@ -112,6 +102,11 @@ public class Mother {
 	}
 	
 	public int getChildHeight()	{ return m_Height; }
+	
+	public Mother(PApplet parent) 
+	{
+		r_Parent = parent; 
+	}
 	
 	/*
 	 * (non-Javadoc)
@@ -364,8 +359,6 @@ public class Mother {
 		}
 	}
 
-
-
 	protected void sendPicWritingStartedMessage() {
 		OSCPortOut sender;
 		try	{
@@ -432,56 +425,6 @@ public class Mother {
 		}
 
 		r_Parent.redraw();
-	}
-
-	protected void sendSupportedMessages(ChildWrapper wrapper) {
-		PApplet child = wrapper.Child();
-		String childName = wrapper.GetName();
-
-		Foetus f = null;
-
-		try {
-			f = (Foetus) child.getClass().getField("f").get(child);
-		}
-		catch (Exception e) {
-			r_Parent.println("CRASH: Accessing child's foetus failed!" + e.getMessage());
-		}
-
-		Hashtable<String, String> supportedMessages = f.getSupportedMessages();
-		Enumeration<String> e = supportedMessages.elements();
-
-		OSCPortOut sender;
-		
-		try {
-			// (m_IP, m_osc_send_port)
-			InetAddress ip = InetAddress.getByName(m_IP);
-			sender = new OSCPortOut(ip, m_osc_send_port);
-
-			ArrayList<String> list = new ArrayList<String>();
-			for (Enumeration<String> ek = supportedMessages.keys(); ek.hasMoreElements();) {
-				list.add(ek.nextElement());
-				list.add(e.nextElement());
-			}
-
-			Object args[] = new Object[list.size()];
-
-			for (int i = 0; i < list.size(); i++) {
-				args[i] = list.get(i);
-			}
-
-			OSCMessage msg = new OSCMessage("/Synth_supported_messages/" + childName, args);
-
-			sender.send(msg);
-		}
-		catch (UnknownHostException e1)	{
-			e1.printStackTrace();
-		}
-		catch (SocketException e1) {
-			e1.printStackTrace();
-		}
-		catch (IOException ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	public void init() {
@@ -752,9 +695,6 @@ public class Mother {
 	 * incoming osc message are forwarded to the oscEvent method.
 	 */
 	public void oscEvent(OscMessage theOscMessage) {
-		PApplet child;
-		Method oscEventMethod;
-
 		String addrPattern 	= theOscMessage.addrPattern();
 //		String typetag 		= theOscMessage.typetag();
 		String[] splits 	= addrPattern.split("/");

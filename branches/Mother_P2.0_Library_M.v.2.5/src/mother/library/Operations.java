@@ -6,10 +6,14 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
+
 import oscP5.OscMessage;
 import processing.core.PApplet;
 import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
+
+import foetus.Foetus;
 
 public class Operations
 {	
@@ -92,7 +96,7 @@ public class Operations
 																	r_M);
 
 				if(wrapper!=null) {
-					r_M.sendSupportedMessages(wrapper);
+					sendSupportedMessages(wrapper);
 				}
 
 				r_M.GetParent().loop();
@@ -133,7 +137,7 @@ public class Operations
 			}
 				
 			if(wrapper!=null) {
-				r_M.sendSupportedMessages(wrapper);
+				sendSupportedMessages(wrapper);
 			}
 
 			r_M.GetParent().loop();
@@ -189,7 +193,7 @@ public class Operations
 
 			if (childName.compareTo(splits[3]) == 0) {
 				if (splits[4].compareTo("Get_Supported_Messages") == 0)	{
-					r_M.sendSupportedMessages((ChildWrapper) r_M.GetSynthContainer().Synths().get(i));
+					sendSupportedMessages((ChildWrapper) r_M.GetSynthContainer().Synths().get(i));
 				}
 				else {
 				// Handling messages to synths
@@ -237,5 +241,55 @@ public class Operations
 	
 	private void Reset() {
 		r_M.GetSynthContainer().reset();
+	}
+	
+	protected void sendSupportedMessages(ChildWrapper wrapper) {
+		PApplet child = wrapper.Child();
+		String childName = wrapper.GetName();
+
+		Foetus f = null;
+
+		try {
+			f = (Foetus) child.getClass().getField("f").get(child);
+		}
+		catch (Exception e) {
+			r_M.GetParent().println("CRASH: Accessing child's foetus failed!" + e.getMessage());
+		}
+
+		Hashtable<String, String> supportedMessages = f.getSupportedMessages();
+		Enumeration<String> e = supportedMessages.elements();
+
+		OSCPortOut sender;
+		
+		try {
+			// (m_IP, m_osc_send_port)
+			InetAddress ip = InetAddress.getByName(r_M.GetIP());
+			sender = new OSCPortOut(ip, r_M.GetOSCSendPort());
+
+			ArrayList<String> list = new ArrayList<String>();
+			for (Enumeration<String> ek = supportedMessages.keys(); ek.hasMoreElements();) {
+				list.add(ek.nextElement());
+				list.add(e.nextElement());
+			}
+
+			Object args[] = new Object[list.size()];
+
+			for (int i = 0; i < list.size(); i++) {
+				args[i] = list.get(i);
+			}
+
+			OSCMessage msg = new OSCMessage("/Synth_supported_messages/" + childName, args);
+
+			sender.send(msg);
+		}
+		catch (UnknownHostException e1)	{
+			e1.printStackTrace();
+		}
+		catch (SocketException e1) {
+			e1.printStackTrace();
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 }
