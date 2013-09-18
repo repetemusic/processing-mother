@@ -82,16 +82,16 @@ public class Mother {
 	
 	ArrayList<Message> m_MessageStack;
 
+	private PGraphics m_synthOutputStack = null;
+	
+	PApplet r_Parent;
+	
 	public float 	getSpeedFraction()	{	return m_SpeedFraction;	}
 	public boolean	getBillboardFlag()	{	return m_Billboard; }
 
-	PApplet r_Parent;
-	
 	PApplet GetParent() { return r_Parent; }
 	
-	public Mother(PApplet parent) {
-		r_Parent = parent;
-	}
+	public Mother(PApplet parent) { r_Parent = parent; }
 	
 	public int getChildWidth() {
 		if(m_Stereo)
@@ -100,9 +100,7 @@ public class Mother {
 			return m_Width;
 	}
 	
-	public int getChildHeight()	{
-		return m_Height;
-	}
+	public int getChildHeight()	{ return m_Height; }
 	
 	/*
 	 * (non-Javadoc)
@@ -128,11 +126,11 @@ public class Mother {
 		listenToOSC();
 
 		// Is sthis still necessary in Processing 2.0?
-		PGraphicsOpenGL pgl = (PGraphicsOpenGL) r_Parent.g;
-		PGL 			gl 	= pgl.beginPGL();
-		GL2 			gl2	= gl.gl.getGL2();
-		gl2.setSwapInterval(1); // set vertical sync on
-		pgl.endPGL();
+//		PGraphicsOpenGL pgl = (PGraphicsOpenGL) r_Parent.g;
+//		PGL 			gl 	= pgl.beginPGL();
+//		GL2 			gl2	= gl.gl.getGL2();
+//		gl2.setSwapInterval(1); // set vertical sync on
+//		pgl.endPGL();
 	}
 
 	public void pre() {
@@ -162,7 +160,7 @@ public class Mother {
 	// IntBuffer arg1 = IntBuffer.allocate(1);
 	// opengl.glGetIntegerv(GL.GL_BLEND_DST, arg1);
 	// println(arg1.get(0));
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -173,9 +171,15 @@ public class Mother {
 		ChildWrapper 	currentChild	= null;
 		PGraphics 		previousChild	= null;
 		PGraphics 		previous		= null;
+		
 		PGraphicsOpenGL pgl 			= (PGraphicsOpenGL) r_Parent.g;
 		PGL 			gl 				= pgl.beginPGL();
 		GL2 			gl2 			= gl.gl.getGL2();
+	
+		if(m_synthOutputStack == null)
+			m_synthOutputStack = r_Parent.createGraphics(	r_Parent.width, 
+															r_Parent.height, 
+															r_Parent.OPENGL);
 
 		dealWithMessageStack(); // Dealing with message stack
 		
@@ -183,7 +187,11 @@ public class Mother {
 		gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		gl2.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-		synchronized (m_SynthLoader) {			
+		synchronized (m_SynthLoader) {
+			m_synthOutputStack.beginDraw();
+			m_synthOutputStack.clear();
+			m_synthOutputStack.endDraw();
+			
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
 
@@ -192,42 +200,47 @@ public class Mother {
 
 				gl2.glEnable(GL.GL_BLEND);
 				// opengl.glDisable(GL.GL_DEPTH_TEST); // Disables Depth Testing
-				pgl.colorMode(r_Parent.RGB, 255);
+//				pgl.colorMode(r_Parent.RGB, 255);
 
 				r_Parent.pushMatrix();
 				r_Parent.pushStyle();
-				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
+//				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
 				gl2.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
-
-//				current.foetusField.incoming = previous;											
-//				current.draw(m_Stereo);
-							
-				if(current.Synths().size()>0) {
-					current.foetusField.incoming = null;
-					
-					current.draw(m_Stereo);
-							
+				
+				current.foetusField.incoming = m_synthOutputStack;
+				
+				current.draw(m_Stereo);
+				
+				if(current.Synths().size()>0) {					
 					for (int kid_i = 0; kid_i < current.Synths().size(); kid_i++) {
-						currentChild  = (ChildWrapper) current.Synths().get(kid_i);
-						
-						if(kid_i == 0) {
+						currentChild  = (ChildWrapper)current.Synths().get(kid_i);
+						// If it is the first sub-synth, give it the output of the parent.
+						// If not, give it the output of the previous sibling.
+						if(kid_i == 0)
 							currentChild.foetusField.incoming = current.foetusField.outgoing;
-						} 
-						else {
+						else
 							currentChild.foetusField.incoming = previousChild;
-						}
 						
-						currentChild.draw(m_Stereo);
+						currentChild.draw(m_Stereo); // draw the effect
 						previousChild = currentChild.foetusField.outgoing;
 					}
 	
+					// Now that I have the output of the child, 
+					// I draw it into the PGrapics of the parent synth:
 					current.foetusField.startDrawing();
-					current.Child().blendMode(r_Parent.ADD);
-					current.Child().image(previous, 
-							0,
-							0, 
-							r_Parent.width, 
-							r_Parent.height);
+					current.Child().clear();
+					current.Child().blendMode(r_Parent.BLEND);
+
+//					This I only need if I don't fix the GlowBlur effect thing. 
+//					Really it should preserve transparency.
+//					Which right now it doesn't do.
+					if(previous != null) {
+						current.Child().image(	previous, 
+												0,
+												0, 
+												r_Parent.width, 
+												r_Parent.height);
+					}
 					
 					current.Child().image(currentChild.foetusField.outgoing, 
 							0,
@@ -235,32 +248,29 @@ public class Mother {
 							r_Parent.width, 
 							r_Parent.height);
 					current.foetusField.endDrawing();
-					
-					previous = current.foetusField.outgoing;
 				}
-				else {
-					// Drawing previous sketch into current one
-//					current.foetusField.startDrawing();
-//					current.Child().clear();
-//					
-//					if(current.foetusField.incoming!=null) {
-////						current.Child().blendMode(current.Child().BLEND);
-//						current.Child().tint(255,255,255,255);
-//						current.Child().image(current.foetusField.incoming, 0, 0, current.Child().width, current.Child().height);
-//					}							
-//					
-//					current.foetusField.endDrawing();
-					
-					current.foetusField.incoming = previous;
-					current.draw(m_Stereo);
-					previous = current.foetusField.outgoing;
-				}
+								
+				m_synthOutputStack.beginDraw();
+				m_synthOutputStack.blendMode(m_synthOutputStack.BLEND);				  
+				m_synthOutputStack.image(current.foetusField.outgoing, 
+							0,
+							0, 
+							m_synthOutputStack.width, 
+							m_synthOutputStack.height);
+				/*
+				 * This is a compromise for the moment, and only expected to be used 
+				 * with Processing 2.0.2, in 2.0.3 it looks wrong I think.
+				 * I should implement a solution that deals with repeated blending,
+				 * when I find the time.
+				 */
+				m_synthOutputStack.image(current.foetusField.outgoing, 
+							0,
+							0, 
+							m_synthOutputStack.width, 
+							m_synthOutputStack.height);
+				m_synthOutputStack.endDraw();
 				
-//				r_Parent.image(current.foetusField.outgoing, 
-//						0, 
-//						0, 
-//						r_Parent.width, 
-//						r_Parent.height);
+				previous = current.foetusField.outgoing;
 				
 				callRegisteredMethod(current, "draw");
 				
@@ -272,23 +282,12 @@ public class Mother {
 				callRegisteredMethod(current, "post");
 			}
 
-			// If there are any synths:
-			// 	Draw the output of the last one!
-			if(m_SynthContainer.Synths().size()>0) {
-//				current = (ChildWrapper) m_SynthContainer.Synths().get(m_SynthContainer.Synths().size()-1);
-//	
-//				r_Parent.image(current.foetusField.outgoing, 
-//						0, 
-//						0, 
-//						r_Parent.width, 
-//						r_Parent.height);
-				
-				r_Parent.image(previous, 
+						
+			r_Parent.image(m_synthOutputStack, 
 						0, 
 						0, 
 						r_Parent.width, 
 						r_Parent.height);
-			}
 		}
 
 		// float m = millis(); // For timing image recording
