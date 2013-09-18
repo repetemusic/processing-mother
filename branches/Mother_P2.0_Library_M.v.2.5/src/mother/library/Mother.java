@@ -199,16 +199,12 @@ public class Mother {
 				callRegisteredMethod(current, "pre");
 
 				gl2.glEnable(GL.GL_BLEND);
-				// opengl.glDisable(GL.GL_DEPTH_TEST); // Disables Depth Testing
-//				pgl.colorMode(r_Parent.RGB, 255);
-
 				r_Parent.pushMatrix();
 				r_Parent.pushStyle();
 //				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
 				gl2.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
 				
-				current.foetusField.incoming = m_synthOutputStack;
-				
+				current.foetusField.incoming = m_synthOutputStack;				
 				current.draw(m_Stereo);
 				
 				if(current.Synths().size()>0) {					
@@ -231,9 +227,12 @@ public class Mother {
 					current.Child().clear();
 					current.Child().blendMode(r_Parent.BLEND);
 
-//					This I only need if I don't fix the GlowBlur effect thing. 
-//					Really it should preserve transparency.
-//					Which right now it doesn't do.
+					/*
+					 * This I only need if I don't fix the GlowBlur effect thing.
+					 * Really it should preserve transparency.
+					 * Which right now it doesn't do.
+					 * Also, it only does something if ADD blending is used.
+					 */
 					if(previous != null) {
 						current.Child().image(	previous, 
 												0,
@@ -364,7 +363,6 @@ public class Mother {
 //		String typetag 		= theOscMessage.typetag();
 		String[] splits 	= addrPattern.split("/");
 
-		/* check if theOscMessage has the address pattern we are looking for. */
 		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))	{
 			synchronized (m_SynthLoader) {
 				if (splits[2].compareTo("Get_synth_names") == 0) {
@@ -415,6 +413,21 @@ public class Mother {
 						}
 					}
 				}
+				else if (splits[2].compareTo("Reset") == 0)	{
+					m_SynthContainer.reset();
+				}
+				else if (splits[2].compareTo("Remove_synth") == 0)	{
+					if (theOscMessage.checkTypetag("s")) {
+						ChildWrapper w = m_SynthContainer.Remove(theOscMessage.get(0).stringValue());
+
+						callRegisteredMethod(w, "dispose");
+					}
+				}
+				else if (splits[2].compareTo("Move_synth") == 0) {
+					if (theOscMessage.checkTypetag("si")) {
+						m_SynthContainer.Move(theOscMessage.get(0).stringValue(), theOscMessage.get(1).intValue());
+					}
+				}
 				else if (splits[2].compareTo("Add_ChildSynth") == 0)	{
 					if (theOscMessage.checkTypetag("sss")) {
 						String parentSynthID = theOscMessage.get(0).stringValue();
@@ -440,19 +453,34 @@ public class Mother {
 						r_Parent.loop();
 					}
 				}
-				else if (splits[2].compareTo("Reset") == 0)	{
-					m_SynthContainer.reset();
-				}
-				else if (splits[2].compareTo("Remove_synth") == 0)	{
-					if (theOscMessage.checkTypetag("s")) {
-						ChildWrapper w = m_SynthContainer.Remove(theOscMessage.get(0).stringValue());
+				else if (splits[2].compareTo("Remove_ChildSynth") == 0)	{
+					if (theOscMessage.checkTypetag("ss")) {
+						String parentSynthID = theOscMessage.get(0).stringValue();
 
-						callRegisteredMethod(w, "dispose");
+						ChildWrapper parentWrapper 	= m_SynthContainer.GetChildWrapper(parentSynthID);
+						ChildWrapper wrapper 		= null;
+						
+						if(parentWrapper!=null) {
+							if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
+								wrapper = parentWrapper.Remove(theOscMessage.get(1).stringValue());
+
+								callRegisteredMethod(wrapper, "dispose");
+							}
+						}
 					}
 				}
-				else if (splits[2].compareTo("Move_synth") == 0) {
-					if (theOscMessage.checkTypetag("si")) {
-						m_SynthContainer.Move(theOscMessage.get(0).stringValue(), theOscMessage.get(1).intValue());
+				else if (splits[2].compareTo("Move_ChildSynth") == 0) {
+					if (theOscMessage.checkTypetag("ssi")) {
+						String parentSynthID = theOscMessage.get(0).stringValue();
+
+						ChildWrapper parentWrapper 	= m_SynthContainer.GetChildWrapper(parentSynthID);
+						ChildWrapper wrapper 		= null;
+						
+						if(parentWrapper!=null) {
+							if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
+								parentWrapper.Move(theOscMessage.get(1).stringValue(), theOscMessage.get(2).intValue());
+							}
+						}
 					}
 				}
 				else if (splits[2].compareTo("Set_synth_blending") == 0) {
