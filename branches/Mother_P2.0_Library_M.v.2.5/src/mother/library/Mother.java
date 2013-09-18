@@ -84,7 +84,18 @@ public class Mother {
 
 	private PGraphics m_synthOutputStack = null;
 	
+	private Operations m_Operations;
+	
 	PApplet r_Parent;
+	
+	public String 			GetIP() 			{ return m_IP;}
+	public int				GetOSCSendPort()	{ return m_osc_send_port; }
+	public int				GetOSCReceivePort()	{ return m_osc_receive_port; }
+	public SynthLoader		GetSynthLoader() 	{ return m_SynthLoader; }
+	public SynthContainer	GetSynthContainer() { return m_SynthContainer; }
+
+	public boolean 	GetWriteImage() 					{ return m_WriteImage; }
+	public void 	SetWriteImage(boolean writeImage)	{ this.m_WriteImage = writeImage;	}
 	
 	public float 	getSpeedFraction()	{	return m_SpeedFraction;	}
 	public boolean	getBillboardFlag()	{	return m_Billboard; }
@@ -122,7 +133,8 @@ public class Mother {
 		m_SynthLoader 		= new SynthLoader(m_Synth_Folder);
 		m_SynthContainer	= new SynthContainer();
 		m_MessageStack 		= new ArrayList<Message>();
-
+		m_Operations		= new Operations(this);
+		
 		listenToOSC();
 
 		// Is sthis still necessary in Processing 2.0?
@@ -352,202 +364,7 @@ public class Mother {
 		}
 	}
 
-	/*
-	 * incoming osc message are forwarded to the oscEvent method.
-	 */
-	public void oscEvent(OscMessage theOscMessage) {
-		PApplet child;
-		Method oscEventMethod;
 
-		String addrPattern 	= theOscMessage.addrPattern();
-//		String typetag 		= theOscMessage.typetag();
-		String[] splits 	= addrPattern.split("/");
-
-		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))	{
-			synchronized (m_SynthLoader) {
-				if (splits[2].compareTo("Get_synth_names") == 0) {
-					OSCPortOut sender;
-					
-					try	{
-						InetAddress ip = InetAddress.getByName(m_IP);
-						ArrayList<String> list = new ArrayList<String>();
-						sender = new OSCPortOut(ip, m_osc_send_port);
-						
-						for (Enumeration<String> e = m_SynthLoader.get_Synth_Names().keys(); e.hasMoreElements();) {
-							list.add(e.nextElement());
-						}
-
-						Object args[] = new Object[list.size()];
-
-						for (int i = 0; i < list.size(); i++) {
-							args[i] = list.get(i);
-						}
-
-						sender.send(new OSCMessage("/Synth_names", args));
-					}
-					catch (UnknownHostException e1) {
-						e1.printStackTrace();
-					}
-					catch (SocketException e1) {
-						e1.printStackTrace();
-					}
-					catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				else if (splits[2].compareTo("Add_synth") == 0)	{
-					if (theOscMessage.checkTypetag("ss")) {
-						if (!m_SynthContainer.contains(theOscMessage.get(1).stringValue()))	{
-							r_Parent.noLoop();
-
-							ChildWrapper wrapper = m_SynthContainer.Add(	theOscMessage.get(1).stringValue(), 
-																			theOscMessage.get(0).stringValue(),
-																			m_SynthLoader,
-																			this);
-
-							if(wrapper!=null) {
-								sendSupportedMessages(wrapper);
-							}
-
-							r_Parent.loop();
-						}
-					}
-				}
-				else if (splits[2].compareTo("Reset") == 0)	{
-					m_SynthContainer.reset();
-				}
-				else if (splits[2].compareTo("Remove_synth") == 0)	{
-					if (theOscMessage.checkTypetag("s")) {
-						ChildWrapper w = m_SynthContainer.Remove(theOscMessage.get(0).stringValue());
-
-						callRegisteredMethod(w, "dispose");
-					}
-				}
-				else if (splits[2].compareTo("Move_synth") == 0) {
-					if (theOscMessage.checkTypetag("si")) {
-						m_SynthContainer.Move(theOscMessage.get(0).stringValue(), theOscMessage.get(1).intValue());
-					}
-				}
-				else if (splits[2].compareTo("Add_ChildSynth") == 0)	{
-					if (theOscMessage.checkTypetag("sss")) {
-						String parentSynthID = theOscMessage.get(0).stringValue();
-						
-						r_Parent.noLoop();
-
-						ChildWrapper parentWrapper 	= m_SynthContainer.GetChildWrapper(parentSynthID);
-						ChildWrapper wrapper 		= null;
-						
-						if(parentWrapper!=null) {
-							if (!parentWrapper.contains(theOscMessage.get(2).stringValue()))	{
-								wrapper = parentWrapper.Add(	theOscMessage.get(2).stringValue(), 
-																theOscMessage.get(1).stringValue(),
-																m_SynthLoader,
-																this);
-							}
-						}
-							
-						if(wrapper!=null) {
-							sendSupportedMessages(wrapper);
-						}
-
-						r_Parent.loop();
-					}
-				}
-				else if (splits[2].compareTo("Remove_ChildSynth") == 0)	{
-					if (theOscMessage.checkTypetag("ss")) {
-						String parentSynthID = theOscMessage.get(0).stringValue();
-
-						ChildWrapper parentWrapper 	= m_SynthContainer.GetChildWrapper(parentSynthID);
-						ChildWrapper wrapper 		= null;
-						
-						if(parentWrapper!=null) {
-							if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
-								wrapper = parentWrapper.Remove(theOscMessage.get(1).stringValue());
-
-								callRegisteredMethod(wrapper, "dispose");
-							}
-						}
-					}
-				}
-				else if (splits[2].compareTo("Move_ChildSynth") == 0) {
-					if (theOscMessage.checkTypetag("ssi")) {
-						String parentSynthID = theOscMessage.get(0).stringValue();
-
-						ChildWrapper parentWrapper 	= m_SynthContainer.GetChildWrapper(parentSynthID);
-						ChildWrapper wrapper 		= null;
-						
-						if(parentWrapper!=null) {
-							if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
-								parentWrapper.Move(theOscMessage.get(1).stringValue(), theOscMessage.get(2).intValue());
-							}
-						}
-					}
-				}
-				else if (splits[2].compareTo("Set_synth_blending") == 0) {
-					if (theOscMessage.checkTypetag("sii")) {
-						m_SynthContainer.Set_Synth_Blending(theOscMessage.get(0).stringValue(), theOscMessage.get(1)
-								.intValue(), theOscMessage.get(2).intValue());
-					}
-				}
-				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4) {
-					StringBuffer newAddrPattern = new StringBuffer();
-					String childName;
-
-					for (int pos = 4; pos < splits.length; pos++) {
-						newAddrPattern.append("/" + splits[pos]);
-					}
-
-					for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
-						child 		= ((ChildWrapper) m_SynthContainer.Synths().get(i)).Child();
-						childName 	= ((ChildWrapper) m_SynthContainer.Synths().get(i)).GetName();
-
-						if (childName.compareTo(splits[3]) == 0) {
-							if (splits[4].compareTo("Get_Supported_Messages") == 0)	{
-								sendSupportedMessages((ChildWrapper) m_SynthContainer.Synths().get(i));
-							}
-							else {
-							// Handling messages to synths
-								try	{
-									// removing "/Mother/Child/Synth_Name" from address pattern
-									theOscMessage.setAddrPattern(newAddrPattern.toString());
-
-									oscEventMethod = child.getClass().getDeclaredMethod("oscEvent",
-											new Class[] { OscMessage.class });
-
-									oscEventMethod.invoke(child, new Object[] { theOscMessage });
-								}
-								catch (Exception e)	{
-									r_Parent.println("CRASH Child oscEvent" + childName + e.getStackTrace());
-									r_Parent.println(e.getStackTrace());
-								}
-							}
-
-							break;
-						}
-					}
-				}
-				else if (splits[2].compareTo("Record") == 0) {
-					if (theOscMessage.checkTypetag("i")) {
-						int in = theOscMessage.get(0).intValue();
-
-						if (in == 1) {
-							m_WriteImage = true;
-							System.out.println("Recording!");
-						}
-						else if (in == 0) {
-							m_WriteImage = false;
-							System.out.println("Stopped Recording!");
-						}
-					}
-				}
-
-			}
-		}
-		else {
-		// Message not for mother
-			// println("Unhandled OSC message: " + theOscMessage.addrPattern());
-		}
-	}
 
 	protected void sendPicWritingStartedMessage() {
 		OSCPortOut sender;
@@ -746,7 +563,7 @@ public class Mother {
 		}
 	}
 
-	private void callRegisteredMethod(ChildWrapper w, String parameter)	{
+	public void callRegisteredMethod(ChildWrapper w, String parameter)	{
 		try {
 			Class params[] 	= new Class[1];
 			params[0] 		= String.class;
@@ -930,4 +747,26 @@ public class Mother {
 	/*
 	 * public void run() { main(null); }
 	 */
+	
+	/*
+	 * incoming osc message are forwarded to the oscEvent method.
+	 */
+	public void oscEvent(OscMessage theOscMessage) {
+		PApplet child;
+		Method oscEventMethod;
+
+		String addrPattern 	= theOscMessage.addrPattern();
+//		String typetag 		= theOscMessage.typetag();
+		String[] splits 	= addrPattern.split("/");
+
+		if (splits.length >= 2 && (splits[1].compareTo("Mother") == 0))	{
+			synchronized (m_SynthLoader) {
+				m_Operations.oscEvent(theOscMessage, splits);
+			}
+		}
+		else {
+		// Message not for mother
+			// println("Unhandled OSC message: " + theOscMessage.addrPattern());
+		}
+	}
 }
