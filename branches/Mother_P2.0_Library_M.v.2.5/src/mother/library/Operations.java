@@ -297,7 +297,6 @@ public class Operations
 		}
 	}
 	
-	
 	private void SetChildBlendMode(OscMessage theOscMessage) {
 		if (theOscMessage.checkTypetag("ssi")) {
 			int mode = 1;
