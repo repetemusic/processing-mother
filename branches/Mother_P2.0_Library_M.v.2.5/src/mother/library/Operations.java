@@ -30,13 +30,13 @@ public class Operations
 				if (splits[2].compareTo("Get_synth_names") == 0)
 					Get_Synth_Names();
 				else if (splits[2].compareTo("Add_synth") == 0)
-					Add_synth(theOscMessage);			
+					Add_synth(theOscMessage, r_M.GetSynthContainer());			
 				else if (splits[2].compareTo("Reset") == 0)
 					Reset();
 				else if (splits[2].compareTo("Remove_synth") == 0)
-					RemoveSynth(theOscMessage);
+					RemoveSynth(theOscMessage, r_M.GetSynthContainer());
 				else if (splits[2].compareTo("Move_synth") == 0)
-					MoveSynth(theOscMessage);
+					MoveSynth(theOscMessage, r_M.GetSynthContainer());
 				else if (splits[2].compareTo("Add_ChildSynth") == 0)
 					Add_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Remove_ChildSynth") == 0)
@@ -52,7 +52,7 @@ public class Operations
 				else if (splits[2].compareTo("Set_ChildAlpha") == 0)
 					SetChildAlpha(theOscMessage);
 				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4)
-					Child(theOscMessage, splits);
+					Child(theOscMessage, splits, r_M.GetSynthContainer(), 0);
 				else if (splits[2].compareTo("Record") == 0)
 					Record(theOscMessage);
 		}
@@ -93,15 +93,15 @@ public class Operations
 		}
 	}
 	
-	private void Add_synth(OscMessage theOscMessage) {
+	private void Add_synth(OscMessage theOscMessage, SynthContainer scIn) {
 		if (theOscMessage.checkTypetag("ss")) {
-			if (!r_M.GetSynthContainer().contains(theOscMessage.get(1).stringValue()))	{
+			if (!scIn.contains(theOscMessage.get(1).stringValue()))	{
 				r_M.GetParent().noLoop();
 
-				ChildWrapper wrapper = r_M.GetSynthContainer().Add(	theOscMessage.get(1).stringValue(), 
-																	theOscMessage.get(0).stringValue(),
-																	r_M.GetSynthLoader(),
-																	r_M);
+				ChildWrapper wrapper = scIn.Add(	theOscMessage.get(1).stringValue(), 
+													theOscMessage.get(0).stringValue(),
+													r_M.GetSynthLoader(),
+													r_M);
 
 				if(wrapper!=null) {
 					sendSupportedMessages(wrapper);
@@ -112,17 +112,84 @@ public class Operations
 		}
 	}
 	
-	private void RemoveSynth(OscMessage theOscMessage) {
+	private void RemoveSynth(OscMessage theOscMessage, SynthContainer scIn) {
 		if (theOscMessage.checkTypetag("s")) {
-			ChildWrapper w = r_M.GetSynthContainer().Remove(theOscMessage.get(0).stringValue());
+			ChildWrapper w = scIn.Remove(theOscMessage.get(0).stringValue());
 
 			r_M.callRegisteredMethod(w, "dispose");
 		}
 	}
 	
-	private void MoveSynth(OscMessage theOscMessage) {
+	private void MoveSynth(OscMessage theOscMessage, SynthContainer scIn) {
 		if (theOscMessage.checkTypetag("si")) {
-			r_M.GetSynthContainer().Move(theOscMessage.get(0).stringValue(), theOscMessage.get(1).intValue());
+			scIn.Move(theOscMessage.get(0).stringValue(), theOscMessage.get(1).intValue());
+		}
+	}
+	
+	private void Child(OscMessage theOscMessage, String[] splits, SynthContainer scIn, int splitsDepth) {
+		String 			childName 			= null;
+		PApplet 		child 				= null;
+		Method 			oscEventMethod 		= null;
+		ChildWrapper	currentChildWrapper	= null;
+			
+		for (int i = 0; i < scIn.Synths().size(); i++) {
+			currentChildWrapper = (ChildWrapper) scIn.Synths().get(i); 
+			child 				= currentChildWrapper.Child();
+			childName 			= currentChildWrapper.GetName();
+
+			if (childName.compareTo(splits[3-splitsDepth]) == 0) {
+				if (splits[4-splitsDepth].compareTo("Get_Supported_Messages") == 0)
+					sendSupportedMessages((ChildWrapper) scIn.Synths().get(i));
+				else if (splits[4-splitsDepth].compareTo("Add_synth") == 0)
+					Add_synth(theOscMessage, currentChildWrapper);	
+				else if (splits[4-splitsDepth].compareTo("Remove_synth") == 0)
+					RemoveSynth(theOscMessage, currentChildWrapper);
+				else if (splits[4-splitsDepth].compareTo("Move_synth") == 0)
+					MoveSynth(theOscMessage, currentChildWrapper);
+				else {
+				// Handling messages to synths
+					try	{
+						StringBuffer newAddrPattern = new StringBuffer();
+						
+						if(splitsDepth==0) {
+							for (int pos = 4; pos < splits.length; pos++) {
+								newAddrPattern.append("/" + splits[pos]);
+							}
+						}
+						else {
+							for (int pos = 4-splitsDepth; pos < splits.length; pos++) {
+								newAddrPattern.append("/" + splits[pos]);
+							}
+						}
+
+						String[] newSplits = newAddrPattern.toString().split("/"); 
+						if(newSplits.length == 2) 
+						{						
+							// removing "/Mother/Child/Synth_Name" from address pattern
+							theOscMessage.setAddrPattern(newAddrPattern.toString());
+	
+							oscEventMethod = child.getClass().getDeclaredMethod("oscEvent",
+									new Class[] { OscMessage.class });
+	
+							oscEventMethod.invoke(child, new Object[] { theOscMessage });
+						}
+						else 
+						{
+							if(splitsDepth==0) {
+								theOscMessage.setAddrPattern(newAddrPattern.toString());
+							
+								Child(theOscMessage, newAddrPattern.toString().split("/"), currentChildWrapper, 2);
+							}
+						}
+					}
+					catch (Exception e)	{
+						PApplet.println("CRASH Child oscEvent" + childName + e.getStackTrace());
+						PApplet.println(e.getStackTrace());
+					}
+				}
+
+				break;
+			}
 		}
 	}
 	
@@ -179,47 +246,6 @@ public class Operations
 				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
 					parentWrapper.Move(theOscMessage.get(1).stringValue(), theOscMessage.get(2).intValue());
 				}
-			}
-		}
-	}
-	
-	private void Child(OscMessage theOscMessage, String[] splits) {
-		StringBuffer newAddrPattern = new StringBuffer();
-		String childName;
-
-		for (int pos = 4; pos < splits.length; pos++) {
-			newAddrPattern.append("/" + splits[pos]);
-		}
-
-		PApplet child;
-		Method oscEventMethod;
-		
-		for (int i = 0; i < r_M.GetSynthContainer().Synths().size(); i++) {
-			child 		= ((ChildWrapper) r_M.GetSynthContainer().Synths().get(i)).Child();
-			childName 	= ((ChildWrapper) r_M.GetSynthContainer().Synths().get(i)).GetName();
-
-			if (childName.compareTo(splits[3]) == 0) {
-				if (splits[4].compareTo("Get_Supported_Messages") == 0)	{
-					sendSupportedMessages((ChildWrapper) r_M.GetSynthContainer().Synths().get(i));
-				}
-				else {
-				// Handling messages to synths
-					try	{
-						// removing "/Mother/Child/Synth_Name" from address pattern
-						theOscMessage.setAddrPattern(newAddrPattern.toString());
-
-						oscEventMethod = child.getClass().getDeclaredMethod("oscEvent",
-								new Class[] { OscMessage.class });
-
-						oscEventMethod.invoke(child, new Object[] { theOscMessage });
-					}
-					catch (Exception e)	{
-						PApplet.println("CRASH Child oscEvent" + childName + e.getStackTrace());
-						PApplet.println(e.getStackTrace());
-					}
-				}
-
-				break;
 			}
 		}
 	}
