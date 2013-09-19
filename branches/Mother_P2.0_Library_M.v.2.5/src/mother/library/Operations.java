@@ -131,13 +131,15 @@ public class Operations
 		PApplet 		child 				= null;
 		Method 			oscEventMethod 		= null;
 		ChildWrapper	currentChildWrapper	= null;
-			
+		String 			destinationName;
+		
 		for (int i = 0; i < scIn.Synths().size(); i++) {
 			currentChildWrapper = (ChildWrapper) scIn.Synths().get(i); 
 			child 				= currentChildWrapper.Child();
 			childName 			= currentChildWrapper.GetName();
-
-			if (childName.compareTo(splits[3-splitsDepth]) == 0) {
+			destinationName 	= splits[3-splitsDepth];
+			
+			if (childName.compareTo(destinationName) == 0) {
 				if (splits[4-splitsDepth].compareTo("Get_Supported_Messages") == 0)
 					sendSupportedMessages((ChildWrapper) scIn.Synths().get(i));
 				else if (splits[4-splitsDepth].compareTo("Add_synth") == 0)
@@ -146,11 +148,14 @@ public class Operations
 					RemoveSynth(theOscMessage, currentChildWrapper);
 				else if (splits[4-splitsDepth].compareTo("Move_synth") == 0)
 					MoveSynth(theOscMessage, currentChildWrapper);
-				else {
-				// Handling messages to synths
+				else {		
+					// Handling messages to synths
 					try	{
 						StringBuffer newAddrPattern = new StringBuffer();
 						
+						/*
+						 * Building a new AP, removing the parent.
+						 */
 						if(splitsDepth==0) {
 							for (int pos = 4; pos < splits.length; pos++) {
 								newAddrPattern.append("/" + splits[pos]);
@@ -163,23 +168,18 @@ public class Operations
 						}
 
 						String[] newSplits = newAddrPattern.toString().split("/"); 
-						if(newSplits.length == 2) 
-						{						
+						
+						theOscMessage.setAddrPattern(newAddrPattern.toString());
+						
+						if(newSplits.length == 2) {
 							// removing "/Mother/Child/Synth_Name" from address pattern
-							theOscMessage.setAddrPattern(newAddrPattern.toString());
-	
 							oscEventMethod = child.getClass().getDeclaredMethod("oscEvent",
 									new Class[] { OscMessage.class });
 	
 							oscEventMethod.invoke(child, new Object[] { theOscMessage });
 						}
-						else 
-						{
-							if(splitsDepth==0) {
-								theOscMessage.setAddrPattern(newAddrPattern.toString());
-							
-								Child(theOscMessage, newAddrPattern.toString().split("/"), currentChildWrapper, 2);
-							}
+						else {							
+							Child(theOscMessage, newAddrPattern.toString().split("/"), currentChildWrapper, 2);
 						}
 					}
 					catch (Exception e)	{
