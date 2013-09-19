@@ -44,9 +44,9 @@ public class Operations
 				else if (splits[2].compareTo("Move_ChildSynth") == 0)
 					Move_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Set_BlendMode") == 0)
-					SetBlendMode(theOscMessage);
+					SetBlendMode(theOscMessage, r_M.GetSynthContainer());
 				else if (splits[2].compareTo("Set_Alpha") == 0)
-					SetAlpha(theOscMessage);
+					SetAlpha(theOscMessage, r_M.GetSynthContainer());
 				else if (splits[2].compareTo("Set_ChildBlendMode") == 0)
 					SetChildBlendMode(theOscMessage);
 				else if (splits[2].compareTo("Set_ChildAlpha") == 0)
@@ -148,6 +148,12 @@ public class Operations
 					RemoveSynth(theOscMessage, currentChildWrapper);
 				else if (splits[4-splitsDepth].compareTo("Move_synth") == 0)
 					MoveSynth(theOscMessage, currentChildWrapper);
+				else if (splits[4-splitsDepth].compareTo("Set_BlendMode") == 0) {
+					SetBlendMode(theOscMessage, currentChildWrapper);
+				}
+				else if (splits[4-splitsDepth].compareTo("Set_Alpha") == 0) {
+					SetAlpha(theOscMessage, currentChildWrapper);
+				}
 				else {		
 					// Handling messages to synths
 					try	{
@@ -157,6 +163,7 @@ public class Operations
 						 * Building a new AP, removing the parent.
 						 */
 						if(splitsDepth==0) {
+							// removing "/Mother/Child/Synth_Name" from address pattern
 							for (int pos = 4; pos < splits.length; pos++) {
 								newAddrPattern.append("/" + splits[pos]);
 							}
@@ -172,7 +179,6 @@ public class Operations
 						theOscMessage.setAddrPattern(newAddrPattern.toString());
 						
 						if(newSplits.length == 2) {
-							// removing "/Mother/Child/Synth_Name" from address pattern
 							oscEventMethod = child.getClass().getDeclaredMethod("oscEvent",
 									new Class[] { OscMessage.class });
 	
@@ -265,7 +271,7 @@ public class Operations
 		}
 	}
 	
-	private void SetBlendMode(OscMessage theOscMessage) {
+	private void SetBlendMode(OscMessage theOscMessage, SynthContainer scIn) {
 		if (theOscMessage.checkTypetag("si")) {
 			
 			/*
@@ -304,19 +310,19 @@ public class Operations
 			else if(theOscMessage.get(1).intValue() == 10)
 				mode = PConstants.REPLACE;
 			
-			r_M.GetSynthContainer().Set_BlendMode(theOscMessage.get(0).stringValue(), mode);
+			scIn.Set_BlendMode(theOscMessage.get(0).stringValue(), mode);
 		}
 	}
 	
-	private void SetAlpha(OscMessage theOscMessage) {
+	private void SetAlpha(OscMessage theOscMessage, SynthContainer scIn) {
 		if (theOscMessage.checkTypetag("sf")) {
-			r_M.GetSynthContainer().SetAlpha(
+			scIn.SetAlpha(
 					theOscMessage.get(0).stringValue(), 
 					theOscMessage.get(1).floatValue()
 					);
 		}
 		else if (theOscMessage.checkTypetag("if")) {
-			r_M.GetSynthContainer().SetAlpha(
+			scIn.SetAlpha(
 					theOscMessage.get(0).intValue(), 
 					theOscMessage.get(1).floatValue()
 					);
