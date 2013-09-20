@@ -43,14 +43,6 @@ public class Operations
 					Remove_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Move_ChildSynth") == 0)
 					Move_ChildSynth(theOscMessage);
-				else if (splits[2].compareTo("Set_BlendMode") == 0)
-					SetBlendMode(theOscMessage, r_M.GetSynthContainer());
-				else if (splits[2].compareTo("Set_Alpha") == 0)
-					SetAlpha(theOscMessage, r_M.GetSynthContainer());
-				else if (splits[2].compareTo("Set_ChildBlendMode") == 0)
-					SetChildBlendMode(theOscMessage);
-				else if (splits[2].compareTo("Set_ChildAlpha") == 0)
-					SetChildAlpha(theOscMessage);
 				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4)
 					Child(theOscMessage, splits, r_M.GetSynthContainer(), 0);
 				else if (splits[2].compareTo("Record") == 0)
@@ -271,8 +263,8 @@ public class Operations
 		}
 	}
 	
-	private void SetBlendMode(OscMessage theOscMessage, SynthContainer scIn) {
-		if (theOscMessage.checkTypetag("si")) {
+	private void SetBlendMode(OscMessage theOscMessage, ChildWrapper in) {
+		if (theOscMessage.checkTypetag("i")) {
 			
 			/*
 			 *	BLEND - linear interpolation of colours: C = A*factor + B. This is the default blending mode.
@@ -289,108 +281,39 @@ public class Operations
 			
 			int mode = 1;
 			
-			if(theOscMessage.get(1).intValue() == 1)
+			int value = theOscMessage.get(0).intValue();
+			
+			if( value == 1)
 				mode = PConstants.BLEND;
-			else if(theOscMessage.get(1).intValue() == 2)
+			else if(value == 2)
 				mode = PConstants.ADD;
-			else if(theOscMessage.get(1).intValue() == 3)
+			else if(value == 3)
 				mode = PConstants.SUBTRACT;
-			else if(theOscMessage.get(1).intValue() == 4)
+			else if(value == 4)
 				mode = PConstants.DARKEST;
-			else if(theOscMessage.get(1).intValue() == 5)
+			else if(value == 5)
 				mode = PConstants.LIGHTEST;
-			else if(theOscMessage.get(1).intValue() == 6)
+			else if(value == 6)
 				mode = PConstants.DIFFERENCE;
-			else if(theOscMessage.get(1).intValue() == 7)
+			else if(value == 7)
 				mode = PConstants.EXCLUSION;
-			else if(theOscMessage.get(1).intValue() == 8)
+			else if(value == 8)
 				mode = PConstants.MULTIPLY;
-			else if(theOscMessage.get(1).intValue() == 9)
+			else if(value == 9)
 				mode = PConstants.SCREEN;
-			else if(theOscMessage.get(1).intValue() == 10)
+			else if(value == 10)
 				mode = PConstants.REPLACE;
 			
-			scIn.Set_BlendMode(theOscMessage.get(0).stringValue(), mode);
+			in.SetBlendMode(mode);
 		}
 	}
 	
-	private void SetAlpha(OscMessage theOscMessage, SynthContainer scIn) {
-		if (theOscMessage.checkTypetag("sf")) {
-			scIn.SetAlpha(
-					theOscMessage.get(0).stringValue(), 
-					theOscMessage.get(1).floatValue()
-					);
-		}
-		else if (theOscMessage.checkTypetag("if")) {
-			scIn.SetAlpha(
-					theOscMessage.get(0).intValue(), 
-					theOscMessage.get(1).floatValue()
-					);
+	private void SetAlpha(OscMessage theOscMessage, ChildWrapper in) {
+		if (theOscMessage.checkTypetag("f")) {
+			in.SetAlpha(theOscMessage.get(0).floatValue());
 		}
 	}
-	
-	private void SetChildBlendMode(OscMessage theOscMessage) {
-		if (theOscMessage.checkTypetag("ssi")) {
-			int mode = 1;
-			
-			if(theOscMessage.get(2).intValue() == 1)
-				mode = PConstants.BLEND;
-			else if(theOscMessage.get(2).intValue() == 2)
-				mode = PConstants.ADD;
-			else if(theOscMessage.get(2).intValue() == 3)
-				mode = PConstants.SUBTRACT;
-			else if(theOscMessage.get(2).intValue() == 4)
-				mode = PConstants.DARKEST;
-			else if(theOscMessage.get(2).intValue() == 5)
-				mode = PConstants.LIGHTEST;
-			else if(theOscMessage.get(2).intValue() == 6)
-				mode = PConstants.DIFFERENCE;
-			else if(theOscMessage.get(2).intValue() == 7)
-				mode = PConstants.EXCLUSION;
-			else if(theOscMessage.get(2).intValue() == 8)
-				mode = PConstants.MULTIPLY;
-			else if(theOscMessage.get(2).intValue() == 9)
-				mode = PConstants.SCREEN;
-			else if(theOscMessage.get(2).intValue() == 10)
-				mode = PConstants.REPLACE;
-			
-			String parentSynthID = theOscMessage.get(0).stringValue();
-			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
-			if(parentWrapper!=null) {
-				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
-					parentWrapper.Set_BlendMode(theOscMessage.get(1).stringValue(), mode);
-				}
-			}
-		}
-	}
-	
-	private void SetChildAlpha(OscMessage theOscMessage) {
-		if (theOscMessage.checkTypetag("ssf")) {
-			String parentSynthID = theOscMessage.get(0).stringValue();
-			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
-			if(parentWrapper!=null) {
-				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
-					parentWrapper.SetAlpha(
-							theOscMessage.get(1).stringValue(), 
-							theOscMessage.get(2).floatValue()
-							);
-				}
-			}
-			
-		}
-		else if (theOscMessage.checkTypetag("sif")) {
-			String parentSynthID = theOscMessage.get(0).stringValue();
-			ChildWrapper parentWrapper 	= r_M.GetSynthContainer().GetChildWrapper(parentSynthID);
-			if(parentWrapper!=null) {
-				if (parentWrapper.contains(theOscMessage.get(1).stringValue()))	{
-					parentWrapper.SetAlpha(
-							theOscMessage.get(1).intValue(), 
-							theOscMessage.get(2).floatValue()
-							);				}
-			}
-		}
-	}
-	
+		
 	private void Reset() {
 		r_M.GetSynthContainer().reset();
 	}

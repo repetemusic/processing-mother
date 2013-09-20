@@ -43,8 +43,6 @@ public class ChildWrapper extends SynthContainer {
 		r_Mother				= mother;
 		m_Name 					= name;
 		m_RenderBillboard 		= billboard;		
-//		m_Blending_Source 		= GL.GL_SRC_ALPHA;
-//		m_Blending_Destination 	= GL.GL_ONE_MINUS_SRC_ALPHA;
 		m_Child 				= child;	
 	}
 		
