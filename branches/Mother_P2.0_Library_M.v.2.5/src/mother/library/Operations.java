@@ -125,6 +125,12 @@ public class Operations
 		ChildWrapper	currentChildWrapper	= null;
 		String 			destinationName;
 		
+
+		if(splits.length<(4-splitsDepth+1)) {
+			System.out.println("Invalid address pattern!");
+			return;
+		}
+					
 		for (int i = 0; i < scIn.Synths().size(); i++) {
 			currentChildWrapper = (ChildWrapper) scIn.Synths().get(i); 
 			child 				= currentChildWrapper.Child();
