@@ -13,6 +13,8 @@ public class FoetusParameter {
 	
 	String m_Address;
 	
+	public String getAddress() {return m_Address; }
+	
 	boolean m_Splerp = true;
 
 	Foetus r_f; 

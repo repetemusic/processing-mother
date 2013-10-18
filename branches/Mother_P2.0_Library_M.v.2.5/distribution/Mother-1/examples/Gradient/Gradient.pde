@@ -1,17 +1,3 @@
-import toxi.color.*;
-import toxi.color.theory.*;
-import toxi.math.conversion.*;
-import toxi.geom.*;
-import toxi.math.*;
-import toxi.geom.mesh2d.*;
-import toxi.util.datatypes.*;
-import toxi.util.events.*;
-import toxi.geom.mesh.subdiv.*;
-import toxi.geom.mesh.*;
-import toxi.math.waves.*;
-import toxi.util.*;
-import toxi.math.noise.*;
-
 import oscP5.*;
 import foetus.*;
 import processing.core.*;
@@ -63,8 +49,8 @@ void initializeFoetus()
 
   // Register messages that synth responds to (see OSC documentation)
   // This is here done automatically by the FoetusParameter constructors.
-  m_TopR = new FoetusParameter(f, 1.0, "/TopRed", 	"f");
-  m_TopG = new FoetusParameter(f, 0, "/TopGreen", 	"f");
+  m_TopR = new FoetusParameter(f, 0, "/TopRed", 	"f");
+  m_TopG = new FoetusParameter(f, 1.0, "/TopGreen", 	"f");
   m_TopB = new FoetusParameter(f, 0, "/TopBlue",        "f");
   m_BotR = new FoetusParameter(f, 0, "/BotRed", 	"f");
   m_BotG = new FoetusParameter(f, 0, "/BotGreen", 	"f");

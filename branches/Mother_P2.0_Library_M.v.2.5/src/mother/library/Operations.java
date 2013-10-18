@@ -16,6 +16,7 @@ import com.illposed.osc.OSCMessage;
 import com.illposed.osc.OSCPortOut;
 
 import foetus.Foetus;
+import foetus.FoetusParameter;
 
 public class Operations
 {	
@@ -177,6 +178,9 @@ public class Operations
 						theOscMessage.setAddrPattern(newAddrPattern.toString());
 						
 						if(newSplits.length == 2) {
+							
+							updateFoetusParameter(theOscMessage, currentChildWrapper);
+							
 							oscEventMethod = child.getClass().getDeclaredMethod("oscEvent",
 									new Class[] { OscMessage.class });
 	
@@ -192,6 +196,27 @@ public class Operations
 					}
 				}
 
+				break;
+			}
+		}
+	}
+	
+	private void updateFoetusParameter(OscMessage theOscMessage, ChildWrapper wrapper) {
+		Foetus 	f 		= wrapper.foetusField;
+
+		String inAP = theOscMessage.addrPattern();
+		String inTTS = theOscMessage.typetag();
+		ArrayList<FoetusParameter> params = f.getParameters();
+		
+		for(int pi = 0; pi < params.size(); pi++) {
+			if(params.get(pi).getAddress().compareTo(inAP) == 0) {
+				if(inTTS.compareTo("i") == 0) {
+					params.get(pi).setValue(theOscMessage.get(0).intValue());
+				}
+				else if(inTTS.compareTo("f") == 0) {
+					params.get(pi).setValue(theOscMessage.get(0).floatValue());	
+				}
+				
 				break;
 			}
 		}

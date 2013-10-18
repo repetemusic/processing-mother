@@ -12,7 +12,6 @@ import java.util.Hashtable;
  */
 public class ChildWrapper extends SynthContainer {
 //	private Logger logger = null;
-//	RenderSketchToTexture m_RenderToTexture;
 	
 	PApplet 		m_Child; 
 	Mother  		r_Mother;		
@@ -52,43 +51,28 @@ public class ChildWrapper extends SynthContainer {
 	
 	public void draw(boolean stereo) {		
 		if(m_Child.g != null) {
-			if(m_RenderBillboard) {
-//				if( m_RenderToTexture == null)
-//				{
-//					m_RenderToTexture = new RenderSketchToTexture(	r_Mother.getChildWidth(), 
-//																	r_Mother.getChildHeight(), 
-//																	m_Child, 
-//																	r_Mother,
-//																	stereo);
-//				}
-//				
-//				
-//				m_RenderToTexture.draw();				
+//			logger.info("Before Draw: " + m_Name);
+				
+			m_Child.frameCount	= r_Mother.GetParent().frameCount;
+			
+			ArrayList<FoetusParameter> params = this.foetusField.getParameters();
+			
+			for(int pi = 0; pi < params.size(); pi++) {
+				params.get(pi).tick();
 			}
-			else {
-//				logger.info("Before Draw: " + m_Name);
+			
+			PGraphicsOpenGL pgl = (PGraphicsOpenGL) m_Child.g;
+			PGL opengl 			= pgl.beginPGL();
+			
+			opengl.gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+			
+			m_Child.g.pushMatrix();				
+			m_Child.draw();
+			m_Child.g.popMatrix();
+			
+			pgl.endPGL();
 				
-				m_Child.frameCount	= r_Mother.GetParent().frameCount;
-				
-				ArrayList<FoetusParameter> params = this.foetusField.getParameters();
-				
-				for(int pi = 0; pi < params.size(); pi++) {
-					params.get(pi).tick();
-				}
-				
-				PGraphicsOpenGL pgl = (PGraphicsOpenGL) m_Child.g;
-				PGL opengl 			= pgl.beginPGL();
-				
-				opengl.gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-				
-				m_Child.g.pushMatrix();				
-				m_Child.draw();
-				m_Child.g.popMatrix();
-				
-				pgl.endPGL();
-				
-//				logger.info("After Draw: " + m_Name);
-			}
+//			logger.info("After Draw: " + m_Name);
 		}
 		else {
 //			System.out.println("Applet thread not yet initialized, g == null");
