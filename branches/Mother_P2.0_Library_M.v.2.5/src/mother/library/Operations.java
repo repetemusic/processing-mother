@@ -38,6 +38,8 @@ public class Operations
 					RemoveSynth(theOscMessage, r_M.GetSynthContainer());
 				else if (splits[2].compareTo("Move_synth") == 0)
 					MoveSynth(theOscMessage, r_M.GetSynthContainer());
+				else if (splits[2].compareTo("Rename_synth") == 0)
+					RenameSynth(theOscMessage, r_M.GetSynthContainer());
 				else if (splits[2].compareTo("Add_ChildSynth") == 0)
 					Add_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Remove_ChildSynth") == 0)
@@ -119,6 +121,12 @@ public class Operations
 		}
 	}
 	
+	private void RenameSynth(OscMessage theOscMessage, SynthContainer scIn) {
+		if (theOscMessage.checkTypetag("ss")) {
+			scIn.Rename(theOscMessage.get(0).stringValue(), theOscMessage.get(1).stringValue());
+		}
+	}
+	
 	private void Child(OscMessage theOscMessage, String[] splits, SynthContainer scIn, int splitsDepth) {
 		String 			childName 			= null;
 		PApplet 		child 				= null;
@@ -128,7 +136,7 @@ public class Operations
 		
 
 		if(splits.length<(4-splitsDepth+1)) {
-			System.out.println("Invalid address pattern!");
+			System.out.println("Invalid address pattern: " + theOscMessage.addrPattern());
 			return;
 		}
 					

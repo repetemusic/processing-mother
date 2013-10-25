@@ -32,6 +32,7 @@ public class ChildWrapper extends SynthContainer {
 	public void		SetBlendMode(int mode)				{ m_BlendMode = mode; }
 	
 	public String 	GetName() 							{ return m_Name; }
+	public void 	SetName(String name) 				{ m_Name = name; }
 	public Foetus 	getFoetusField()					{ return foetusField; }
 	public void 	setFoetusField(Foetus foetusField)	{ this.foetusField = foetusField; }
 

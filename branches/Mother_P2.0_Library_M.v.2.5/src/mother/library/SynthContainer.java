@@ -136,9 +136,9 @@ public class SynthContainer
 			for (int i = 0; i < m_VisualSynths.size(); i++)	{
 				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
 
-				if ((element.GetName().compareTo(key) == 0) &&
-						(m_VisualSynths.size() > newLocation)
-						&& (newLocation >= 0)) {
+				if (	(element.GetName().compareTo(key) == 0) &&
+						(m_VisualSynths.size() > newLocation) 	&& 
+						(newLocation >= 0) ) {
 					m_VisualSynths.remove(i);
 
 					m_VisualSynths.add(newLocation, element);
@@ -152,4 +152,32 @@ public class SynthContainer
 			return false;
 		}
 	}	
+	
+	/**
+	 * 
+	 * @param key
+	 * @param newKey
+	 * @return
+	 */
+	public boolean Rename(String key, String newKey) {
+		if (m_Visual_Synth_Keys.containsKey(key)) {
+			for (int i = 0; i < m_VisualSynths.size(); i++)	{
+				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
+
+				if (	(element.GetName().compareTo(key) == 0) && 
+						!contains(newKey) ) {
+					String sketchName = m_Visual_Synth_Keys.get(key);
+					m_Visual_Synth_Keys.remove(key);
+					m_Visual_Synth_Keys.put(key, sketchName);
+					element.SetName(newKey);
+					break;
+				}
+			}
+
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }
