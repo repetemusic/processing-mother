@@ -277,7 +277,7 @@ public class Mother {
 
 		pgl.endPGL();
 		
-		printFrameRate();
+//		printFrameRate();
 	}
 
 	protected void finalize() {

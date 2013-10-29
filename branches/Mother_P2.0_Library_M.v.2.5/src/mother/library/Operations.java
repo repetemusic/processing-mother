@@ -46,10 +46,10 @@ public class Operations
 					Remove_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Move_ChildSynth") == 0)
 					Move_ChildSynth(theOscMessage);
-				else if (splits[2].compareTo("Child") == 0 && splits.length >= 4)
-					Child(theOscMessage, splits, r_M.GetSynthContainer(), 0);
 				else if (splits[2].compareTo("Record") == 0)
 					Record(theOscMessage);
+				else if (splits.length >= 3)
+					Child(theOscMessage, splits, r_M.GetSynthContainer(), 0);
 		}
 		else {
 		// Message not for mother
@@ -135,7 +135,7 @@ public class Operations
 		String 			destinationName;
 		
 
-		if(splits.length<(4-splitsDepth+1)) {
+		if(splits.length<(2-splitsDepth+1)) {
 			System.out.println("Invalid address pattern: " + theOscMessage.addrPattern());
 			return;
 		}
@@ -144,21 +144,23 @@ public class Operations
 			currentChildWrapper = (ChildWrapper) scIn.Synths().get(i); 
 			child 				= currentChildWrapper.Child();
 			childName 			= currentChildWrapper.GetName();
-			destinationName 	= splits[3-splitsDepth];
+			destinationName 	= splits[2-splitsDepth];
 			
 			if (childName.compareTo(destinationName) == 0) {
-				if (splits[4-splitsDepth].compareTo("Get_Supported_Messages") == 0)
+				if (splits[3-splitsDepth].compareTo("Get_Supported_Messages") == 0)
 					sendSupportedMessages((ChildWrapper) scIn.Synths().get(i));
-				else if (splits[4-splitsDepth].compareTo("Add_synth") == 0)
+				else if (splits[3-splitsDepth].compareTo("Add_synth") == 0)
 					Add_synth(theOscMessage, currentChildWrapper);	
-				else if (splits[4-splitsDepth].compareTo("Remove_synth") == 0)
+				else if (splits[3-splitsDepth].compareTo("Remove_synth") == 0)
 					RemoveSynth(theOscMessage, currentChildWrapper);
-				else if (splits[4-splitsDepth].compareTo("Move_synth") == 0)
+				else if (splits[3-splitsDepth].compareTo("Move_synth") == 0)
 					MoveSynth(theOscMessage, currentChildWrapper);
-				else if (splits[4-splitsDepth].compareTo("Set_BlendMode") == 0) {
+				else if (splits[3-splitsDepth].compareTo("Rename_synth") == 0)
+					RenameSynth(theOscMessage, currentChildWrapper);
+				else if (splits[3-splitsDepth].compareTo("Set_BlendMode") == 0) {
 					SetBlendMode(theOscMessage, currentChildWrapper);
 				}
-				else if (splits[4-splitsDepth].compareTo("Set_Alpha") == 0) {
+				else if (splits[3-splitsDepth].compareTo("Set_Alpha") == 0) {
 					SetAlpha(theOscMessage, currentChildWrapper);
 				}
 				else {		
@@ -170,13 +172,13 @@ public class Operations
 						 * Building a new AP, removing the parent.
 						 */
 						if(splitsDepth==0) {
-							// removing "/Mother/Child/Synth_Name" from address pattern
-							for (int pos = 4; pos < splits.length; pos++) {
+							// removing "/Mother/Synth_Name" from address pattern
+							for (int pos = 3; pos < splits.length; pos++) {
 								newAddrPattern.append("/" + splits[pos]);
 							}
 						}
 						else {
-							for (int pos = 4-splitsDepth; pos < splits.length; pos++) {
+							for (int pos = 3-splitsDepth; pos < splits.length; pos++) {
 								newAddrPattern.append("/" + splits[pos]);
 							}
 						}
@@ -195,7 +197,7 @@ public class Operations
 							oscEventMethod.invoke(child, new Object[] { theOscMessage });
 						}
 						else {							
-							Child(theOscMessage, newAddrPattern.toString().split("/"), currentChildWrapper, 2);
+							Child(theOscMessage, newAddrPattern.toString().split("/"), currentChildWrapper, 1);
 						}
 					}
 					catch (Exception e)	{

@@ -79,9 +79,13 @@ public class FoetusParameter {
 		else {
 			r_f.setUpdatingStatus(m_Address, true);	
 		}
-		
-		//System.out.println("Last: " + m_LastValue + " New: " + m_NewValue + " Factor: " + m_Factor);
-		//System.out.println(m_Value + ", " + PApplet.lerp(m_LastValue, m_NewValue, ani.position()));
+
+//		System.out.println(		"Last: " + m_LastValue + 
+//								", New: " + m_NewValue + 
+//								", Factor: " + m_Factor);
+//		
+//		System.out.println(	"Value: " + m_Value + 
+//							", Lerp: " + PApplet.lerp(m_LastValue, m_NewValue, ani.position()));
 		
 		return m_Value;
 	}
@@ -109,6 +113,8 @@ public class FoetusParameter {
 	    	m_LastValue = val;
 	    	m_Value 	= val;
 	    	r_f.setUpdatingStatus(m_Address, false);
+	    	timeStarted = System.currentTimeMillis(); // 2013
+//	    	System.out.println("No splerp: " + elapsed);
 	    }
 	    else {
 	    	m_Splerp = true;
@@ -122,6 +128,8 @@ public class FoetusParameter {
 	    	ani.start();
 	    	
 	    	timeStarted = System.currentTimeMillis();
+	    	
+//	    	System.out.println("YES! Splerp: " + elapsed);
 	    }
 	}
 	
