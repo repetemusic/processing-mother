@@ -35,8 +35,11 @@ public class Foetus {
 	 */
 	public boolean standalone = true;
 
+	public ArrayList<PGraphics> olderSiblings;
+	
 	public PGraphics incoming;
 	public PGraphics outgoing;
+	
 	public final String VERSION = "0.5.0";
 	
 	PApplet parent;
@@ -61,6 +64,8 @@ public class Foetus {
 		this.parent = parent;
 	
 		m_Parameters = new ArrayList<FoetusParameter>();
+		
+		olderSiblings = new ArrayList<PGraphics>();
 		
 		m_Messages = new Hashtable<String,String>();
 		

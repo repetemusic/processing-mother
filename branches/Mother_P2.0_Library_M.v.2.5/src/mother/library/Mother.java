@@ -192,6 +192,8 @@ public class Mother {
 		m_synthOutputStack.clear();
 		m_synthOutputStack.endDraw();
 		
+		ArrayList<PGraphics> olderSiblings = new ArrayList<PGraphics>();
+		
 		synchronized (m_SynthLoader) {		
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
@@ -204,6 +206,15 @@ public class Mother {
 				r_Parent.pushStyle();
 //				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
 				gl2.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
+				
+				if(i>0) {
+					olderSiblings.add(previous);
+				}
+								
+				current.foetusField.olderSiblings.clear();
+				for(int s_i = 0; s_i<olderSiblings.size(); s_i++) {
+					current.foetusField.olderSiblings.add(olderSiblings.get(s_i));
+				}
 				
 				current.foetusField.incoming = m_synthOutputStack;				
 				current.draw(m_Stereo);
