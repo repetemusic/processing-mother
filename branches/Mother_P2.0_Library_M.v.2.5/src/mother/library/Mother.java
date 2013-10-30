@@ -277,7 +277,7 @@ public class Mother {
 
 		pgl.endPGL();
 		
-//		printFrameRate();
+		printFrameRate();
 	}
 
 	protected void finalize() {
@@ -558,7 +558,10 @@ public class Mother {
 
 				String number = nf.format(fps);
 
-				System.out.println(number);
+				// write the fps, in the top-left of the window
+				r_Parent.frame.setTitle("Mother, " + number + "fps");
+
+//				System.out.println(number);
 			}
 		}
 		else {
