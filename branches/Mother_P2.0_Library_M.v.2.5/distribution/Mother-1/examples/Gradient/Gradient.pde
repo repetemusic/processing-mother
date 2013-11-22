@@ -7,11 +7,11 @@ import javax.media.opengl.*;
 import javax.media.opengl.glu.*;
 
 /**
-* Gradient Visual Synth example, for use with the Mother 1.0 library, both by Ilias Bergstrom.
-* To see what this synth looks like when mixed with another synth, please run the MotherDelivery.pde example,
-* and the MotherControllerExample, and then use the contols in the second to add synths and manipulate their parameters.
-* For more info, read the included "Mother Documentation.pdf" file.
-*/
+ * Gradient Visual Synth example, for use with the Mother 1.0 library, both by Ilias Bergstrom.
+ * To see what this synth looks like when mixed with another synth, please run the MotherDelivery.pde example,
+ * and the MotherControllerExample, and then use the contols in the second to add synths and manipulate their parameters.
+ * For more info, read the included "Mother Documentation.pdf" file.
+ */
 
 // Messages:
 // "/Gradient/TopColor" iii
@@ -25,7 +25,7 @@ FoetusParameter m_TopB;
 FoetusParameter m_BotR;
 FoetusParameter m_BotG;
 FoetusParameter m_BotB;
-	
+
 void setup()
 {
   // When run as a synth, setup() is never called!
@@ -49,31 +49,36 @@ void initializeFoetus()
 
   // Register messages that synth responds to (see OSC documentation)
   // This is here done automatically by the FoetusParameter constructors.
-  m_TopR = new FoetusParameter(f, 0, "/TopRed", 	"f");
-  m_TopG = new FoetusParameter(f, 1.0, "/TopGreen", 	"f");
-  m_TopB = new FoetusParameter(f, 0, "/TopBlue",        "f");
-  m_BotR = new FoetusParameter(f, 0, "/BotRed", 	"f");
-  m_BotG = new FoetusParameter(f, 0, "/BotGreen", 	"f");
-  m_BotB = new FoetusParameter(f, 0, "/BotBlue", 	"f");
+  m_TopR = new FoetusParameter(f, 0, "/TopRed", "f");
+  m_TopG = new FoetusParameter(f, 1.0, "/TopGreen", "f");
+  m_TopB = new FoetusParameter(f, 0, "/TopBlue", "f");
+  m_BotR = new FoetusParameter(f, 0, "/BotRed", "f");
+  m_BotG = new FoetusParameter(f, 0, "/BotGreen", "f");
+  m_BotB = new FoetusParameter(f, 0, "/BotBlue", "f");
 }
 
 void draw()
 {
+  f.startDrawing();
+  clear();
+
   pushMatrix();
-		
+
   beginShape(QUADS);
-			
+
   fill(m_TopR.getValue()*255, m_TopG.getValue()*255, m_TopB.getValue()*255);
   vertex(0, 0);
-  vertex(width - 1, 0);
-		
+  vertex(width, 0);
+
   fill(m_BotR.getValue()*255, m_BotG.getValue()*255, m_BotB.getValue()*255);
-  vertex(width - 1, height - 1);
-  vertex(0, height - 1);
+  vertex(width, height);
+  vertex(0, height);
 
   endShape();
-			
+
   popMatrix();
+
+  f.endDrawing();
 }
 
 /**
@@ -81,58 +86,4 @@ void draw()
  */
 void oscEvent(OscMessage theOscMessage)
 {
-  if (theOscMessage.checkAddrPattern("/TopRed") == true)
-  {
-    /* check if the typetag is the right one. */
-    if (theOscMessage.checkTypetag("f"))
-    {
-      m_TopR.setValue(theOscMessage.get(0).floatValue());
-      return;
-    }
-  } 
-  else if (theOscMessage.checkAddrPattern("/TopGreen") == true)
-  {
-    /* check if the typetag is the right one. */
-    if (theOscMessage.checkTypetag("f"))
-    {
-      m_TopG.setValue(theOscMessage.get(0).floatValue());
-      return;
-    }
-  } 
-  else if (theOscMessage.checkAddrPattern("/TopBlue") == true)
-  {
-    /* check if the typetag is the right one. */
-    if (theOscMessage.checkTypetag("f"))
-    {
-      m_TopB.setValue(theOscMessage.get(0).floatValue());
-      return;
-    }
-  } 
-  else if (theOscMessage.checkAddrPattern("/BotRed") == true)
-  {
-    /* check if the typetag is the right one. */
-    if (theOscMessage.checkTypetag("f"))
-    {
-      m_BotR.setValue(theOscMessage.get(0).floatValue());
-      return;
-    }
-  }
-  else if (theOscMessage.checkAddrPattern("/BotGreen") == true)
-  {
-    /* check if the typetag is the right one. */
-    if (theOscMessage.checkTypetag("f"))
-    {
-      m_BotG.setValue(theOscMessage.get(0).floatValue());
-      return;
-    }
-  }
-  else if (theOscMessage.checkAddrPattern("/BotBlue") == true)
-  {
-    /* check if the typetag is the right one. */
-    if (theOscMessage.checkTypetag("f"))
-    {
-      m_BotB.setValue(theOscMessage.get(0).floatValue());
-      return;
-    }
-  }
 }

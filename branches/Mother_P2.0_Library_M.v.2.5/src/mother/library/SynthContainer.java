@@ -137,8 +137,12 @@ public class SynthContainer
 				ChildWrapper element = ((ChildWrapper) m_VisualSynths.get(i));
 
 				if (	(element.GetName().compareTo(key) == 0) &&
-						(m_VisualSynths.size() > newLocation) 	&& 
 						(newLocation >= 0) ) {
+					
+					if(m_VisualSynths.size() <= newLocation) {
+						newLocation = m_VisualSynths.size()-1; 
+					}
+					
 					m_VisualSynths.remove(i);
 
 					m_VisualSynths.add(newLocation, element);

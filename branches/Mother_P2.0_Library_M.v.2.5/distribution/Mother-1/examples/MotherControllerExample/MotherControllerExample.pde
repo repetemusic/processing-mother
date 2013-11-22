@@ -252,15 +252,15 @@ public void controlEvent(ControlEvent theEvent) {
 
     OscMessage myMessage;
 
-    myMessage = new OscMessage("/Mother/Child/Grad_01/TopRed"); 
+    myMessage = new OscMessage("/Mother/Grad_01/TopRed"); 
     myMessage.add(r/255f);
     oscP5.send(myMessage, myRemoteLocation);
 
-    myMessage = new OscMessage("/Mother/Child/Grad_01/TopGreen");
+    myMessage = new OscMessage("/Mother/Grad_01/TopGreen");
     myMessage.add(g/255f);
     oscP5.send(myMessage, myRemoteLocation);
 
-    myMessage = new OscMessage("/Mother/Child/Grad_01/TopBlue");
+    myMessage = new OscMessage("/Mother/Grad_01/TopBlue");
     myMessage.add(b/255f);
     oscP5.send(myMessage, myRemoteLocation);
   }
@@ -271,15 +271,15 @@ public void controlEvent(ControlEvent theEvent) {
 
     OscMessage myMessage;
 
-    myMessage = new OscMessage("/Mother/Child/Grad_01/BotRed"); 
+    myMessage = new OscMessage("/Mother/Grad_01/BotRed"); 
     myMessage.add(r/255f);
     oscP5.send(myMessage, myRemoteLocation);
 
-    myMessage = new OscMessage("/Mother/Child/Grad_01/BotGreen");
+    myMessage = new OscMessage("/Mother/Grad_01/BotGreen");
     myMessage.add(g/255f);
     oscP5.send(myMessage, myRemoteLocation);
 
-    myMessage = new OscMessage("/Mother/Child/Grad_01/BotBlue");
+    myMessage = new OscMessage("/Mother/Grad_01/BotBlue");
     myMessage.add(b/255f);
     oscP5.send(myMessage, myRemoteLocation);
   }
@@ -287,14 +287,14 @@ public void controlEvent(ControlEvent theEvent) {
 
 void ArcsAlpha(float alpha) {
   OscMessage myMessage;
-  myMessage = new OscMessage("/Mother/Child/Arcs_01/Alpha"); 
+  myMessage = new OscMessage("/Mother/Arcs_01/Alpha"); 
   myMessage.add((int)alpha);
   oscP5.send(myMessage, myRemoteLocation);
 }
 
 void ArcsScale(float scale) {
   OscMessage myMessage;
-  myMessage = new OscMessage("/Mother/Child/Arcs_01/Scale"); 
+  myMessage = new OscMessage("/Mother/Arcs_01/Scale"); 
   myMessage.add((float)scale/64f);
   oscP5.send(myMessage, myRemoteLocation);
 }
@@ -323,7 +323,7 @@ void QuerySynthNames(int theValue) {
 
 void QuerySupportedMessages(int theValue) {
   OscMessage myMessage;
-  myMessage = new OscMessage("/Mother/Child/Grad_01/Get_Supported_Messages"); 
+  myMessage = new OscMessage("/Mother/Grad_01/Get_Supported_Messages"); 
   oscP5.send(myMessage, myRemoteLocation);
 }
 

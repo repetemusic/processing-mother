@@ -497,12 +497,14 @@ public class Mother {
 			Class params[] 	= new Class[1];
 			params[0] 		= String.class;
 			
-			Method m = (Method) ((Class<? extends PApplet>) w.Child().getClass().getGenericSuperclass())
+			if(w!=null) {
+				Method m = (Method) ((Class<? extends PApplet>) w.Child().getClass().getGenericSuperclass())
 					.getDeclaredMethod("handleMethods", params);
 			
-			 m.setAccessible(true);
+				m.setAccessible(true);
 
-			 m.invoke(w.Child(), parameter);
+				m.invoke(w.Child(), parameter);
+			}
 			 
 //			Field sven;
 //

@@ -175,7 +175,7 @@ public class SynthLoader {
 	protected void InitChild(ChildWrapper cw, Mother parent)	{
 		PApplet child = cw.Child();
 
-		Method[] methods 			= child.getClass().getMethods();
+//		Method[] methods 			= child.getClass().getMethods();
 		Method[] declaredMethods 	= child.getClass().getDeclaredMethods();
 		
 		child.g = parent.GetParent().g;

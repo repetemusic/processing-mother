@@ -48,6 +48,8 @@ public class Operations
 					Move_ChildSynth(theOscMessage);
 				else if (splits[2].compareTo("Record") == 0)
 					Record(theOscMessage);
+				else if (splits[2].compareTo("MaxAnimationDuration") == 0)
+					MaxAnimationDuration(theOscMessage);
 				else if (splits.length >= 3)
 					Child(theOscMessage, splits, r_M.GetSynthContainer(), 0);
 		}
@@ -302,6 +304,16 @@ public class Operations
 				System.out.println("Stopped Recording!");
 			}
 		}
+	}
+	
+	private void MaxAnimationDuration(OscMessage theOscMessage) {
+		if (theOscMessage.checkTypetag("f")) {
+			float in = theOscMessage.get(0).floatValue();
+			
+			if(r_M.GetSynthContainer().Synths().size()>0) {
+				r_M.GetSynthContainer().Synths().get(0).getFoetusField().SetMaxAnimationDuration(in*1000f);
+			}
+		}	
 	}
 	
 	private void SetBlendMode(OscMessage theOscMessage, ChildWrapper in) {

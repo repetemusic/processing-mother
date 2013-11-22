@@ -4,6 +4,8 @@ import processing.opengl.*;
 import javax.media.opengl.*;
 import foetus.Foetus;
 import foetus.FoetusParameter;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -19,11 +21,11 @@ public class ChildWrapper extends SynthContainer {
 	String 			m_Name;
 	Foetus 			foetusField;
 	
-	int				m_BlendMode = 1;
-	float			m_Alpha		= 1.0f;
+	int					m_BlendMode = 1;
+	FoetusParameter		m_Alpha;
 	
-	public float 	GetAlpha() 			{ return m_Alpha; }
-	public void 	SetAlpha(float a) 	{ m_Alpha = a; }
+	public float 	GetAlpha() 			{ return m_Alpha.getValue(); }
+	public void 	SetAlpha(float a) 	{ m_Alpha.setValue(a); }
 	
 	public PApplet 	Child()								{ return m_Child;	}
 	public boolean 	GetRenderBillboard()				{ return m_RenderBillboard; }
@@ -34,7 +36,11 @@ public class ChildWrapper extends SynthContainer {
 	public String 	GetName() 							{ return m_Name; }
 	public void 	SetName(String name) 				{ m_Name = name; }
 	public Foetus 	getFoetusField()					{ return foetusField; }
-	public void 	setFoetusField(Foetus foetusField)	{ this.foetusField = foetusField; }
+	
+	public void 	setFoetusField(Foetus foetusField)	{
+		this.foetusField = foetusField; 
+		m_Alpha = new FoetusParameter(foetusField, 1.0f, "/SetAlpha", "f" );
+	}
 
 	/**
 	 *  ChildWrapper CONSTRUCTOR
@@ -42,8 +48,8 @@ public class ChildWrapper extends SynthContainer {
 	public ChildWrapper(PApplet child, String name, boolean billboard, Mother mother) {	
 		r_Mother				= mother;
 		m_Name 					= name;
-		m_RenderBillboard 		= billboard;		
-		m_Child 				= child;	
+		m_RenderBillboard 		= billboard;
+		m_Child 				= child;
 	}
 		
 	/**
