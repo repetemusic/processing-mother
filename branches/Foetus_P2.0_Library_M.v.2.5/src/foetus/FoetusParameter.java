@@ -9,7 +9,7 @@ public class FoetusParameter {
 	float m_Value;
 	float m_LastValue;
 	float m_NewValue;
-	float m_Factor;
+	//float m_Factor;
 	
 	String m_Address;
 	
@@ -91,8 +91,11 @@ public class FoetusParameter {
 	}
 		
 	/**
-	 * Set a new value for the parameter. This will trigger an interpolation with the 
+	 * Set a new value for the parameter. This may trigger an interpolation with the 
 	 * new value as target.
+	 * The criterium for whether interpolation is triggered or not, is how long it was since the last value was received.
+	 * If it was more than 750ms, animation is triggered. If not, the value is just set directly.
+	 * The duration of the animation is dependent on how long it was since the last value was received, up to a maximum of MaxAnimationDuration, a static parameter set in foetus
 	 * @param val
 	 */
 	public void setValue(float val)	{
@@ -104,39 +107,39 @@ public class FoetusParameter {
 		    
 	    elapsed = (long)(elapsedTime/r_f.getSpeedFraction());
 	  
-	//    System.out.println(elapsed/1000f);
+	    //System.out.println(elapsed/1000f);
 	    
 	    ani.end();
 	    
-	    if(elapsed<(500/r_f.getSpeedFraction())) {
+	    if(elapsed<(750/r_f.getSpeedFraction())) {
 	    	m_Splerp 	= false;
 	    	m_LastValue = val;
 	    	m_Value 	= val;
 	    	r_f.setUpdatingStatus(m_Address, false);
 	    	timeStarted = System.currentTimeMillis(); // 2013
-//	    	System.out.println("No splerp: " + elapsed);
+	    	//System.out.println("No splerp: " + elapsed);
 	    }
 	    else {
 	    	m_Splerp = true;
 	    	
-	    	if(elapsed>(3000/r_f.getSpeedFraction()))
-	    		elapsed = (long)(3000/r_f.getSpeedFraction());
+	    	if(elapsed>(r_f.GetMaxAnimationDuration()/r_f.getSpeedFraction()))
+	    		elapsed = (long)(r_f.GetMaxAnimationDuration()/r_f.getSpeedFraction());
 	  	    	
 	    	ani = new Tween(null, elapsed/1000f * r_f.parent.frameRate * r_f.getSpeedFraction(), Tween.FRAMES, Shaper.COSINE);
 	    	//ani.setDuration(elapsed/1000f * r_f.parent.frameRate, Tween.FRAMES);
-	    //	ani.setDuration(elapsed/1000f , Tween.SECONDS);
+	    	//ani.setDuration(elapsed/1000f , Tween.SECONDS);
 	    	ani.start();
 	    	
 	    	timeStarted = System.currentTimeMillis();
 	    	
-//	    	System.out.println("YES! Splerp: " + elapsed);
+	    	//System.out.println("YES! Splerp: " + elapsed);
 	    }
 	}
 	
 	public void tick() {
 		if(ani.isTweening()) {
 			ani.tick();
-//			System.out.println("tick " + ani.position());
+			//System.out.println("tick " + ani.position());
 		}
 	}
 }

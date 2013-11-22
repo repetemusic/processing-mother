@@ -35,8 +35,11 @@ public class Foetus {
 	 */
 	public boolean standalone = true;
 
+	public ArrayList<PGraphics> olderSiblings;
+	
 	public PGraphics incoming;
 	public PGraphics outgoing;
+	
 	public final String VERSION = "0.5.0";
 	
 	PApplet parent;
@@ -61,6 +64,8 @@ public class Foetus {
 		this.parent = parent;
 	
 		m_Parameters = new ArrayList<FoetusParameter>();
+		
+		olderSiblings = new ArrayList<PGraphics>();
 		
 		m_Messages = new Hashtable<String,String>();
 		
@@ -192,8 +197,11 @@ public class Foetus {
 	 * @return
 	 */
 	public void pre() {
-		if (standalone)
+		if (standalone) {
 			parent.background(m_BGColor[0],m_BGColor[1],m_BGColor[2]);
+			
+			outgoing = parent.g;
+		}
 		
 //		System.out.println("Pre: " + parent.toString());
 	}
@@ -210,16 +218,20 @@ public class Foetus {
 		m_Parameters.add(f);	
 	}
 	
-	public void startDrawing() {
-		old_g = parent.g;
-		outgoing.beginDraw();
-		parent.g = outgoing;
+	public void startDrawing() {		
+		if(!standalone) {
+			old_g = parent.g;
+			outgoing.beginDraw();
+			parent.g = outgoing;
+		}
 //		parent.g.clear();
 	}
 	
 	public void endDrawing() {
-		outgoing.endDraw();
-		parent.g = old_g;
-		old_g = null;
+		if(!standalone) {
+			outgoing.endDraw();
+			parent.g = old_g;
+			old_g = null;
+		}
 	}
 }
