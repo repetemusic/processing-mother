@@ -70,14 +70,15 @@ public class ChildWrapper extends SynthContainer {
 			
 			PGraphicsOpenGL pgl = (PGraphicsOpenGL) m_Child.g;
 			PGL opengl 			= pgl.beginPGL();
-			
-			opengl.gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-			
+		
+			PGL.gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+		
 			m_Child.g.pushMatrix();				
 			m_Child.draw();
 			m_Child.g.popMatrix();
-			
+				
 			pgl.endPGL();
+			
 				
 //			logger.info("After Draw: " + m_Name);
 		}

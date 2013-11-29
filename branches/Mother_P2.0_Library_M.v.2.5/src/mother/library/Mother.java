@@ -197,7 +197,7 @@ public class Mother {
 		synchronized (m_SynthLoader) {		
 			for (int i = 0; i < m_SynthContainer.Synths().size(); i++) {
 				current = (ChildWrapper) m_SynthContainer.Synths().get(i);
-
+	
 				PreDrawChildUpdate(current.Child());
 				callRegisteredMethod(current, "pre");
 
@@ -217,19 +217,23 @@ public class Mother {
 				}
 				
 				current.foetusField.incoming = m_synthOutputStack;				
+				
+				
 				current.draw(m_Stereo);
 				
 				if(current.Synths().size()>0) {					
 					for (int kid_i = 0; kid_i < current.Synths().size(); kid_i++) {
 						currentChild  = (ChildWrapper)current.Synths().get(kid_i);
+
 						// If it is the first sub-synth, give it the output of the parent.
 						// If not, give it the output of the previous sibling.
 						if(kid_i == 0)
 							currentChild.foetusField.incoming = current.foetusField.outgoing;
 						else
 							currentChild.foetusField.incoming = previousChild;
-						
+							
 						currentChild.draw(m_Stereo); // draw the effect
+						
 						previousChild = currentChild.foetusField.outgoing;
 					}
 	
