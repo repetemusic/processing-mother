@@ -10,6 +10,5 @@
 	<classpathentry kind="lib" path="lib/javaosc.jar"/>
 	<classpathentry kind="lib" path="lib/javaoscfull.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/processing-Foetus"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/processing-Mother Synths"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

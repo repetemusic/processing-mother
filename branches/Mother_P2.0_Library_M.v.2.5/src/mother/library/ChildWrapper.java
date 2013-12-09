@@ -20,27 +20,16 @@ public class ChildWrapper extends SynthContainer {
 	boolean 		m_RenderBillboard = true;
 	String 			m_Name;
 	Foetus 			foetusField;
-	
-	int					m_BlendMode = 1;
-	FoetusParameter		m_Alpha;
-	
-	public float 	GetAlpha() 			{ return m_Alpha.getValue(); }
-	public void 	SetAlpha(float a) 	{ m_Alpha.setValue(a); }
-	
+		
 	public PApplet 	Child()								{ return m_Child;	}
 	public boolean 	GetRenderBillboard()				{ return m_RenderBillboard; }
 	public void	   	SetRenderBillboard(boolean rB)		{ m_RenderBillboard = rB; }
-	public int 		GetBlendMode()						{ return m_BlendMode; }
-	public void		SetBlendMode(int mode)				{ m_BlendMode = mode; }
 	
 	public String 	GetName() 							{ return m_Name; }
 	public void 	SetName(String name) 				{ m_Name = name; }
 	public Foetus 	getFoetusField()					{ return foetusField; }
 	
-	public void 	setFoetusField(Foetus foetusField)	{
-		this.foetusField = foetusField; 
-		m_Alpha = new FoetusParameter(foetusField, 1.0f, "/SetAlpha", "f" );
-	}
+	public void 	setFoetusField(Foetus foetusField)	{ this.foetusField = foetusField; }
 
 	/**
 	 *  ChildWrapper CONSTRUCTOR

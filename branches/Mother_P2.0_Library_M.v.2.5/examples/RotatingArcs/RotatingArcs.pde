@@ -44,8 +44,8 @@ void setup()
   // Finally, for the synth to work as a processing sketch within the PDE,
   // call initializeFoetus() from within setup().
 
-  size(640, 480, OPENGL);
-  frameRate(24);
+  size(1280, 720, OPENGL);
+  frameRate(30);
 
   initializeFoetus();
 }

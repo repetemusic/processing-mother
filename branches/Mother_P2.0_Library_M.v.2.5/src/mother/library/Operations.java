@@ -357,13 +357,13 @@ public class Operations
 			else if(value == 10)
 				mode = PConstants.REPLACE;
 			
-			in.SetBlendMode(mode);
+			in.foetusField.SetBlendMode(mode);
 		}
 	}
 	
 	private void SetAlpha(OscMessage theOscMessage, ChildWrapper in) {
 		if (theOscMessage.checkTypetag("f")) {
-			in.SetAlpha(theOscMessage.get(0).floatValue());
+			in.foetusField.SetAlpha(theOscMessage.get(0).floatValue());
 		}
 	}
 		
