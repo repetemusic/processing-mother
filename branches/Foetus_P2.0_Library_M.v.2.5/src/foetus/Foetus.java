@@ -61,6 +61,16 @@ public class Foetus {
 	public float GetMaxAnimationDuration() { return m_MaxAnimationDuration; }
 	public void  SetMaxAnimationDuration(float maxAnimationDuration) { m_MaxAnimationDuration = maxAnimationDuration; }
 	
+	FoetusParameter		m_Alpha;
+	int					m_BlendMode = 1;
+	
+	public float 	GetAlpha() 				{ return m_Alpha.getValue(); }
+	public void 	SetAlpha(float a) 		{ m_Alpha.setValue(a); }
+		
+	public int 		GetBlendMode()			{ return m_BlendMode; }
+	public void		SetBlendMode(int mode)	{ m_BlendMode = mode; }
+	
+	
 	/**
 	 * Constructor
 	 * @param parent
@@ -82,6 +92,8 @@ public class Foetus {
 		parent.registerMethod("draw", this);
 				
 		m_BGColor = new int[] {128, 128, 128};
+		
+		m_Alpha = new FoetusParameter(this, 1.0f, "/SetAlpha", "f" );
 	}
 	
 	/**
