@@ -102,6 +102,8 @@ public class FoetusParameter {
 		long elapsed;
 		long elapsedTime = System.currentTimeMillis() - timeStarted;
 		
+		//System.out.println("New value in: " + val);
+		
 	    m_LastValue = m_Value;
 	    m_NewValue  = val;
 		    
@@ -111,7 +113,7 @@ public class FoetusParameter {
 	    
 	    ani.end();
 	    
-	    if(elapsed<(750/r_f.getSpeedFraction())) {
+	    if(elapsed<(750.0/r_f.getSpeedFraction())) {
 	    	m_Splerp 	= false;
 	    	m_LastValue = val;
 	    	m_Value 	= val;
