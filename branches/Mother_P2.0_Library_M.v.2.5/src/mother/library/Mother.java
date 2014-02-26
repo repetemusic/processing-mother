@@ -174,7 +174,7 @@ public class Mother {
 		PGraphics 		previous		= null;
 		PGraphicsOpenGL pgl 			= (PGraphicsOpenGL) r_Parent.g;
 		PGL 			gl 				= pgl.beginPGL();
-		GL2 			gl2 			= gl.gl.getGL2();
+		GL2 			gl2 			= ((PJOGL)gl).gl.getGL2();
 	
 		int width 	= r_Parent.width;
 		int height 	= r_Parent.height;
@@ -204,7 +204,6 @@ public class Mother {
 				gl2.glEnable(GL.GL_BLEND);
 				r_Parent.pushMatrix();
 				r_Parent.pushStyle();
-//				gl2.glBlendFunc(current.GetBlending_Source(), current.GetBlending_Destination());
 				gl2.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
 				
 				if(i>0) {
@@ -217,7 +216,6 @@ public class Mother {
 				}
 				
 				current.foetusField.incoming = m_synthOutputStack;				
-				
 				
 				current.draw(m_Stereo);
 				
@@ -268,7 +266,7 @@ public class Mother {
 				 * I should implement a solution that deals with repeated blending,
 				 * when I find the time.
 				 */
-				m_synthOutputStack.image(current.foetusField.outgoing, 0,	0, width, height);
+				//m_synthOutputStack.image(current.foetusField.outgoing, 0,	0, width, height);
 				m_synthOutputStack.endDraw();
 				
 				previous = current.foetusField.outgoing;

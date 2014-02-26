@@ -1,7 +1,9 @@
 package mother.library;
 import processing.core.*; 
 import processing.opengl.*;
+
 import javax.media.opengl.*;
+
 import foetus.Foetus;
 import foetus.FoetusParameter;
 
@@ -57,18 +59,23 @@ public class ChildWrapper extends SynthContainer {
 				params.get(pi).tick();
 			}
 			
-			PGraphicsOpenGL pgl = (PGraphicsOpenGL) m_Child.g;
-			PGL opengl 			= pgl.beginPGL();
-		
-			PGL.gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
-		
+			PGraphicsOpenGL pgl 	= (PGraphicsOpenGL) m_Child.g;		
+			
+			PGL 			opengl 	= pgl.beginPGL();
+			GL2 			gl2 	= ((PJOGL)opengl).gl.getGL2();
+			
+			gl2.glClear(GL.GL_DEPTH_BUFFER_BIT);
+		    
+			// PREMULTIPLIED ALPHA BLENDING
+			opengl.blendEquationSeparate(PGL.FUNC_ADD, PGL.FUNC_ADD);
+			opengl.blendFuncSeparate(PGL.ONE, PGL.ONE_MINUS_SRC_ALPHA, PGL.ONE, PGL.ZERO);
+			
 			m_Child.g.pushMatrix();				
 			m_Child.draw();
 			m_Child.g.popMatrix();
-				
-			pgl.endPGL();
+			pgl.blendMode(PConstants.BLEND);	
+			pgl.endPGL();	
 			
-				
 //			logger.info("After Draw: " + m_Name);
 		}
 		else {
